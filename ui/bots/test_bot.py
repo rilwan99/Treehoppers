@@ -1,6 +1,7 @@
 import logging
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
+
     Application,
     CommandHandler,
     ContextTypes,
@@ -19,16 +20,21 @@ CHAIN, PHOTO, METADATA, MINT, END = range(5)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
-    reply_keyboard = [["Solana", "Polygon", "Ethereum"]]
+    # text = "Open Phantom Wallet"
+    # button = InlineKeyboardButton(text=text, url="https://www.example.com")
+    # keyboard = ReplyKeyboardMarkup([[button]])
+
+    # reply_keyboard = [[button]]
 
     await update.message.reply_text(
         "Hi, I am the Treehopper. I can help you mint NFTs! "
         "Send /cancel to stop talking to me.\n\n"
-        "Firstly, which chain would you like to mint your NFT on?",
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Solana/Polygon/Ethereum?"
+        "Firstly, lets connect your Phantom Wallet",
+        reply_markup=InlineKeyboardMarkup.from_button(
+            InlineKeyboardButton(text="Connect Wallet", url="https://phantom.app/ul/v1/connect?app_url=https://phantom.app&")
         ),
     )
+
 
     return CHAIN
 
@@ -129,13 +135,13 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token("YOUR_TELE_BOT_TOKEN").build()
+    application = Application.builder().token("1433555369:AAF4KbunZ69OB7-DOIy6TpJBRSvnOrLvXYc").build()
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
-            CHAIN: [MessageHandler(filters.Regex("^(Solana|Polygon|Ethereum)$"), chain)],
+            CHAIN: [MessageHandler(filters.Regex("^(Open Phantom Wallet)$"), chain)],
             PHOTO: [MessageHandler(filters.PHOTO, photo)],
             METADATA: [MessageHandler(filters.Regex("^(.*):(.*):(.*)"), metadata)],
             END: [MessageHandler(filters.Regex("^(Yes|No)$"), end)],
