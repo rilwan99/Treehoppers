@@ -1,14 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{Mint, TokenAccount};
-use anchor_spl::token::{MintTo, Token};
+use anchor_spl::token::{MintTo, Token, mint_to};
 use mpl_token_metadata::instruction::{create_master_edition_v3, create_metadata_accounts_v3};
 
 declare_id!("BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x");
 
 #[program]
 pub mod treehoppers_contract {
-    use anchor_spl::token::mint_to;
 
     use super::*;
 
@@ -31,26 +30,13 @@ pub mod treehoppers_contract {
         // Program in which CPI will be invoked
         let cpi_program = ctx.accounts.token_program.to_account_info();
 
-        // Create CpiContext, which conatains all non-argument inputs for the cpi
+        // Create CpiContext struct, which contains all non-argument inputs for the cpi
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         // Call anchor's helper function to execute CPI, passing in the CPI context and amount
         mint_to(cpi_ctx, 1)?;
     
         msg!("Initializing Token Metadata Account");
-
-        // Accounts required for creating token metadata account
-        let create_metadata_accounts = vec![
-            ctx.accounts.metadata_account.to_account_info(),
-            ctx.accounts.mint_account.to_account_info(),
-            ctx.accounts.mint_authority.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.token_metadata_program.to_account_info(),
-            ctx.accounts.token_program.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.rent.to_account_info(),
-        ];
-
         let creators = vec![
             mpl_token_metadata::state::Creator {
                 address: creator_key,
@@ -75,12 +61,24 @@ pub mod treehoppers_contract {
             uri,
             Some(creators),
             1, // seller_fee_basis_points
-            true, // update_authority_is_signer
+            false, // update_authority_is_signer
             false, // isMutable
             None, // collection (optional)
             None, // uses (optional)
             None, // Collection Details (optional)
         );
+
+        // Accounts required for creating token metadata account
+        let create_metadata_accounts = vec![
+            ctx.accounts.metadata_account.to_account_info(),
+            ctx.accounts.mint_account.to_account_info(),
+            ctx.accounts.mint_authority.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.token_metadata_program.to_account_info(),
+            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            ctx.accounts.rent.to_account_info(),
+        ];
         invoke(create_metadata_instruction, create_metadata_accounts.as_slice())?;
 
         msg!("Initializing Master Edition Account");
@@ -116,20 +114,20 @@ pub struct MintNFT<'info> {
     pub mint_authority: Signer<'info>,
     #[account(mut)]
     pub mint_account: Account<'info, Mint>,
-    pub token_program: Program<'info, Token>,
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(mut)]
-    pub metadata_account: AccountInfo<'info>,
     #[account(mut)]
     pub token_account: Account<'info, TokenAccount>,
     /// CHECK: This is not dangerous because we don't read or write from this account
-    pub token_metadata_program: AccountInfo<'info>,
     #[account(mut)]
+    pub metadata_account: AccountInfo<'info>,
     /// CHECK: This is not dangerous because we don't read or write from this account
+    #[account(mut)]
     pub payer: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
     pub master_edition: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
+    pub token_metadata_program: UncheckedAccount<'info>,
+    pub token_program: Program<'info, Token>,
+    pub rent: Sysvar<'info, Rent>,
 }

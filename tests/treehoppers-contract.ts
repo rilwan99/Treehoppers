@@ -72,7 +72,7 @@ describe("treehoppers-contract", () => {
       owner.publicKey,
       owner.publicKey
     )
-    // Create (Associated) Token Account
+    // Get address of (Associated) Token Account
     nftTokenAccount = await getAssociatedTokenAddress(
       mintAccount.publicKey,
       owner.publicKey
@@ -108,9 +108,9 @@ describe("treehoppers-contract", () => {
     const uri = "https://metadata.y00ts.com/y/2952.json" 
     const title = "TREEHOPPERS"
     const symbol = "3HOP"
-
+    
     const mintTransaction = await program.methods
-    .mintNft(owner.publicKey, uri, title, symbol)
+    .mintNft(mintAccount.publicKey, uri, title, symbol)
     .accounts({
       mintAuthority: owner.publicKey, 
       mintAccount: mintAccount.publicKey, 
@@ -123,7 +123,11 @@ describe("treehoppers-contract", () => {
       rent: SYSVAR_RENT_PUBKEY, 
       masterEdition: masterEditionAccount
     })
-    .rpc()
+    .rpc({commitment: "processed"})
     console.log("Transaction Signature: ", mintTransaction)
+    console.log("NFT Token Account---")
+    console.log(
+      await program.provider.connection.getParsedAccountInfo(nftTokenAccount)
+    );
   })
 });
