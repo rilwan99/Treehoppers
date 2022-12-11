@@ -7,12 +7,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
-
 // Set the route for the '/mint' endpoint
-app.post("/mint", (req, res) => {
+app.post("/", (req, res) => {
   // Get the user's public key, title, and symbol from the request body
   const userPublicKey = req.body.publicKey;
   const title = req.body.title;

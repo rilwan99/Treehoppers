@@ -19,7 +19,7 @@ pub mod treehoppers_contract {
         title: String,
         symbol: String,
     ) -> Result<()> {
-        msg!("Initialzing Mint Account");
+        msg!("Minting 1 NFT to token account");
 
         // Create a struct containing the accounts involved in the mint operation
         let cpi_accounts = MintTo {
@@ -41,7 +41,7 @@ pub mod treehoppers_contract {
 
         // Accounts required for creating token metadata account
         let create_metadata_accounts = vec![
-            ctx.accounts.metadata.to_account_info(),
+            ctx.accounts.metadata_account.to_account_info(),
             ctx.accounts.mint_account.to_account_info(),
             ctx.accounts.mint_authority.to_account_info(),
             ctx.accounts.payer.to_account_info(),
@@ -65,7 +65,7 @@ pub mod treehoppers_contract {
         ];
         let create_metadata_instruction = &create_metadata_accounts_v3(
             ctx.accounts.token_metadata_program.key(),
-            ctx.accounts.metadata.key(),
+            ctx.accounts.metadata_account.key(),
             ctx.accounts.mint_account.key(),
             ctx.accounts.mint_authority.key(),
             ctx.accounts.payer.key(),
@@ -89,7 +89,7 @@ pub mod treehoppers_contract {
             ctx.accounts.mint_account.to_account_info(),
             ctx.accounts.mint_authority.to_account_info(),
             ctx.accounts.payer.to_account_info(),
-            ctx.accounts.metadata.to_account_info(),
+            ctx.accounts.metadata_account.to_account_info(),
             ctx.accounts.token_metadata_program.to_account_info(),
             ctx.accounts.token_program.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
@@ -101,7 +101,7 @@ pub mod treehoppers_contract {
             ctx.accounts.mint_account.key(),
             ctx.accounts.payer.key(),
             ctx.accounts.mint_authority.key(),
-            ctx.accounts.metadata.key(),
+            ctx.accounts.metadata_account.key(),
             ctx.accounts.payer.key(),
             Some(0),
         );
@@ -119,7 +119,7 @@ pub struct MintNFT<'info> {
     pub token_program: Program<'info, Token>,
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub metadata: AccountInfo<'info>,
+    pub metadata_account: AccountInfo<'info>,
     #[account(mut)]
     pub token_account: Account<'info, TokenAccount>,
     /// CHECK: This is not dangerous because we don't read or write from this account

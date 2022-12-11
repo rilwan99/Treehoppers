@@ -1,4 +1,5 @@
 import logging
+import requests
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Application,
@@ -8,6 +9,12 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from dotenv import load_dotenv
+import os
+
+#Import Environment Vairables
+load_dotenv()
+TELE_API = os.getenv('TELE_API')
 
 import requests
 
@@ -71,6 +78,7 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     user = update.message.from_user
     user_response = update.message.text
+    # Formats users response
     address = user_response.split(' : ')[0]
     context.user_data['address'] = address
     chain = context.user_data['chain']
@@ -85,7 +93,35 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         f"Awesome, now Minting NFT to {address} on {chain}"
     )
 
-    # call /mint endpoint to execute nft minting
+    # Post request to Express API
+    # Set the endpoint URL, local for now
+    endpoint_url = "http://localhost:3000/"
+
+    # Set the parameters
+    # Default params for testing
+    params = {
+        "publicKey": "5BQ2t7HdGEQ2c1XD3SJgCsy7f9Pf5JkpLp1gM1V7FAnQ",
+        "title": "My NFT",
+        "symbol": "MYNFT",
+    }
+    # params = {
+    #     "publicKey": address,
+    #     "title": title,
+    #     "symbol": symbol,
+    # }
+
+    # Send the request
+    response = requests.post(endpoint_url, json=params)
+
+    # Check the response
+    if response.status_code == 200:
+        print("API call successful!")
+        print(response)
+        await update.message.reply_text(
+        f"NFT Minted! You can view your NFT here: {address}"
+        )
+    else:
+        print("Error calling API: {}".format(response.text))
 
     # Set the URL for the Express.js API
     api = "http://localhost:3000"
@@ -144,7 +180,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token("1433555369:AAF4KbunZ69OB7-DOIy6TpJBRSvnOrLvXYc").build()
+    application = Application.builder().token(TELE_API).build()
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
