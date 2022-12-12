@@ -60,8 +60,7 @@ describe("treehoppers-contract", () => {
   };
 
   it("Initialize User, Mint and Token accounts", async () => {
-
-    // Create Account for user
+    
     const customConnection = new Connection(process.env.CUSTOM_DEVNET_RPC)
     const airdrop = await customConnection.requestAirdrop(userAccount.publicKey, 2 * LAMPORTS_PER_SOL)
     console.log("Airdrop transaction: ", airdrop)
