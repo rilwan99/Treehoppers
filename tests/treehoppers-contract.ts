@@ -9,7 +9,9 @@ import {
   MINT_SIZE,
   getMinimumBalanceForRentExemptMint,
 } from "@solana/spl-token";
-import { LAMPORTS_PER_SOL, PublicKey, Keypair, SystemProgram, Transaction, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
+import { PublicKey, Keypair, SystemProgram, Transaction, SYSVAR_RENT_PUBKEY, LAMPORTS_PER_SOL, Connection } from "@solana/web3.js";
+require("dotenv").config({ path: ".env" });
+
 
 describe("treehoppers-contract", () => {
   // Configure the client to use the local cluster.
@@ -24,6 +26,13 @@ describe("treehoppers-contract", () => {
   const lamports: number = MINT_SIZE;
   const mintAccount: Keypair = Keypair.generate();
   const owner = provider.wallet;
+  const userAccount = Keypair.generate()
+
+  // Variables storing Public keys of following accounts 
+  let nftTokenAccount;
+  let metadataAccount;
+  let masterEditionAccount;
+
   const getMetadataAccount = async (mint_account: PublicKey): Promise<PublicKey> => {
     return (
       await PublicKey.findProgramAddressSync(
@@ -50,17 +59,19 @@ describe("treehoppers-contract", () => {
     )[0];
   };
 
-  // Variables storing Public keys of following accounts 
-  let nftTokenAccount;
-  let metadataAccount;
-  let masterEditionAccount;
+  it("Initialize User, Mint and Token accounts", async () => {
 
-  it("Initialize Mint and Token accounts", async () => {
+    // Create Account for user
+    const customConnection = new Connection(process.env.CUSTOM_DEVNET_RPC)
+    const airdrop = await customConnection.requestAirdrop(userAccount.publicKey, 2 * LAMPORTS_PER_SOL)
+    console.log("Airdrop transaction: ", airdrop)
+    const balance = await provider.connection.getBalance(userAccount.publicKey)
+    console.log("User Account balance: ", balance / LAMPORTS_PER_SOL)
 
     // Create & Initialize Mint Account
     const rent_lamports = await getMinimumBalanceForRentExemptMint(program.provider.connection)
     const createMintInstruction = SystemProgram.createAccount({
-      fromPubkey: owner.publicKey,
+      fromPubkey: userAccount.publicKey,
       newAccountPubkey: mintAccount.publicKey,
       lamports: rent_lamports,
       space: MINT_SIZE,
@@ -69,18 +80,18 @@ describe("treehoppers-contract", () => {
     const initializeMintInstruction = createInitializeMintInstruction(
       mintAccount.publicKey,
       0,
-      owner.publicKey,
-      owner.publicKey
+      userAccount.publicKey,
+      userAccount.publicKey
     )
     // Get address of (Associated) Token Account
     nftTokenAccount = await getAssociatedTokenAddress(
       mintAccount.publicKey,
-      owner.publicKey
+      userAccount.publicKey
     )
     const createAtaInstruction = createAssociatedTokenAccountInstruction(
-      owner.publicKey,
+      userAccount.publicKey,
       nftTokenAccount,
-      owner.publicKey,
+      userAccount.publicKey,
       mintAccount.publicKey,
     )
     const transactions = new Transaction().add(
@@ -88,12 +99,12 @@ describe("treehoppers-contract", () => {
       initializeMintInstruction, 
       createAtaInstruction
     )
-    const response = await provider.sendAndConfirm(transactions, [mintAccount]);
+    const response = await provider.sendAndConfirm(transactions, [mintAccount, userAccount]);
 
     console.log("Transaction Signature: ", response);
     console.log("Mint Account address: ", mintAccount.publicKey.toString());
-    console.log("User Account address: ", owner.publicKey.toString());
-    console.log("[NFT] Token Account address: ", nftTokenAccount.toString());
+    console.log("User Account address: ", userAccount.publicKey.toString());
+    console.log("[NFT] Token Account address: ", nftTokenAccount.toString(), {skipPreflight: true});
   });
 
   it("Send Mint NFT Instruction", async() => {
@@ -112,17 +123,18 @@ describe("treehoppers-contract", () => {
     const mintTransaction = await program.methods
     .mintNft(mintAccount.publicKey, uri, title, symbol)
     .accounts({
-      mintAuthority: owner.publicKey, 
+      mintAuthority: userAccount.publicKey, 
       mintAccount: mintAccount.publicKey, 
       tokenProgram: TOKEN_PROGRAM_ID, 
       metadataAccount: metadataAccount,
       tokenAccount: nftTokenAccount, 
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID, 
-      payer: owner.publicKey, 
+      payer: userAccount.publicKey, 
       systemProgram: SystemProgram.programId, 
       rent: SYSVAR_RENT_PUBKEY, 
       masterEdition: masterEditionAccount
     })
+    .signers([userAccount])
     .rpc({commitment: "processed"})
     console.log("Transaction Signature: ", mintTransaction)
     console.log("NFT Token Account---")
