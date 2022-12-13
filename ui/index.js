@@ -12,8 +12,38 @@ import idl from "../target/idl/treehoppers_contract.json"
 
 // Create a new Express.js web server
 const app = express();
+const fs = require('fs');
 
 app.use(bodyParser.json());
+
+//Testing endpoint to see if the post request works
+app.post('/', (req,res) => {
+  // Send a success message as a response
+  res.send('API called success');
+})
+
+app.get('/generateKey', (req, res) => {
+  try {
+    // generate a new key pair
+    const keypair = new Keypair();
+    const publicKey = keypair.publicKey
+    const secretKey = keypair.secretKey
+
+    console.log(publicKey)
+    console.log(secretKey)
+    // store the keys in a text file locally
+    fs.writeFileSync('keys.txt', `Public key: ${publicKey}\nPrivate key: ${secretKey}`);
+
+    // return the public and private keys
+    res.send({
+      publicKey: keypair.publicKey,
+      privateKey: keypair.secretKey,
+    });
+  } catch (err) {
+    // handle errors
+    res.status(500).send({ error: err.message });
+  }
+});
 
 // Set the route for the '/mint' endpoint
 app.post("/mint", (req, res) => {

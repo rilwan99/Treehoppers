@@ -95,7 +95,7 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Post request to Express API
     # Set the endpoint URL, local for now
-    endpoint_url = "http://localhost:3000/"
+    endpoint_url = "http://localhost:3000"
 
     # Set the parameters
     # Default params for testing
@@ -110,8 +110,22 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     #     "symbol": symbol,
     # }
 
-    # Send the request
-    response = requests.post(endpoint_url, json=params)
+    # Send request to generate Key pair
+    response = requests.get(endpoint_url+'/generateKey')
+    # check the response status code
+    if response.status_code == 200:
+        # print the public and private keys
+        keys = response.json()
+        print(keys['publicKey'])
+        print(keys['privateKey'])
+    else:
+        # print the error message
+        print(response.json()['error'])
+    
+    # Send request to upload meta data and image
+
+    # Send the request to mint
+    response = requests.post(endpoint_url + "/mint", json=params)
 
     # Check the response
     if response.status_code == 200:
@@ -123,19 +137,6 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     else:
         print("Error calling API: {}".format(response.text))
 
-    # Set the URL for the Express.js API
-    api = "http://localhost:3000"
-
-    # Set the data for the POST request
-    data = {
-    "publicKey": address,
-    "title": title,
-    "symbol": symbol
-    }
-
-    # Send the POST request to the '/mint' endpoint
-    response = requests.post(api + "/mint", json=data)
-    print(response.text)
     reply_keyboard = [["Yes", "No"]]
 
     await update.message.reply_text(
