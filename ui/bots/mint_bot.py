@@ -68,8 +68,8 @@ async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     logger.info("nft of %s: %s", user.first_name, f"{user.first_name}_nft.jpg")
     
     await update.message.reply_text(
-        "Looks great! Now, send me your wallet address, title, and symbol for your NFT in the following format:\n\n"
-        "address : title : symbol"
+        "Looks great! Now, send me the title and symbol for your NFT in the following format:\n\n"
+        "title : symbol"
     )
 
     return METADATA
@@ -78,37 +78,13 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     user = update.message.from_user
     user_response = update.message.text
-    # Formats users response
-    address = user_response.split(' : ')[0]
-    context.user_data['address'] = address
-    chain = context.user_data['chain']
-    title = user_response.split(' : ')[1]
-    symbol = user_response.split(' : ')[2]
 
     logger.info(
-        "address of %s: %s, nft title: %s, nft symbol: %s", user.first_name, address, title, symbol
+        "Generating new key pair..."
     )
-
-    await update.message.reply_text(
-        f"Awesome, now Minting NFT to {address} on {chain}"
-    )
-
     # Post request to Express API
     # Set the endpoint URL, local for now
     endpoint_url = "http://localhost:3000"
-
-    # Set the parameters
-    # Default params for testing
-    params = {
-        "publicKey": "5BQ2t7HdGEQ2c1XD3SJgCsy7f9Pf5JkpLp1gM1V7FAnQ",
-        "title": "My NFT",
-        "symbol": "MYNFT",
-    }
-    # params = {
-    #     "publicKey": address,
-    #     "title": title,
-    #     "symbol": symbol,
-    # }
 
     # Send request to generate Key pair
     response = requests.get(endpoint_url+'/generateKey')
@@ -118,18 +94,43 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         keys = response.json()
         print(keys['publicKey'])
         print(keys['privateKey'])
+        
     else:
         # print the error message
         print(response.json()['error'])
     
+    # Formats users response
+    address = keys['publicKey']
+    context.user_data['address'] = address
+    chain = context.user_data['chain']
+    title = user_response.split(' : ')[0]
+    symbol = user_response.split(' : ')[1]
     # Send request to upload meta data and image
+    logger.info(
+        "Uploading Metadata..."
+    )
+
+
+    # Set the parameters
+    params = {
+        "publicKey": address,
+        "title": title,
+        "symbol": symbol,
+    }
+
+    logger.info(
+        "address of %s: %s, nft title: %s, nft symbol: %s", user.first_name, address, title, symbol
+    )
+
+    await update.message.reply_text(
+        f"Awesome, now Minting NFT to {address} on {chain}"
+    )
 
     # Send the request to mint
     response = requests.post(endpoint_url + "/mint", json=params)
 
     # Check the response
     if response.status_code == 200:
-        print("API call successful!")
         print(response)
         await update.message.reply_text(
         f"NFT Minted! You can view your NFT here: {address}"
@@ -189,7 +190,7 @@ def main() -> None:
         states={
             CHAIN: [MessageHandler(filters.Regex("^(Solana|Polygon|Ethereum)$"), chain)],
             PHOTO: [MessageHandler(filters.PHOTO, photo)],
-            METADATA: [MessageHandler(filters.Regex("^(.*):(.*):(.*)"), metadata)],
+            METADATA: [MessageHandler(filters.Regex("^(.*):(.*)"), metadata)],
             END: [MessageHandler(filters.Regex("^(Yes|No)$"), end)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
