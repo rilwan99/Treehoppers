@@ -108,28 +108,40 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Send request to upload meta data and image
     logger.info(
-        "Uploading Metadata..."
+        "Uploading Image..."
     )
-
-    # Set the parameters
-    params = {
-        "publicKey": address,
-        "title": title,
-        "symbol": symbol,
-    }
 
     # Create path where the image is located
     base_path = os.path.realpath(__file__)
     parent_dir = os.path.dirname(base_path)
-    image_path = os.path.join(parent_dir, 'nft_photos/')
-    print(image_path)
-    # Load the uploaded image from the user
-    with open(image_path+user.first_name+"_nft.jpg", "rb") as image:
-        image_data = image.read()
-
-    # Send both Image and user params to the endpoint for uploading to ipfs
-    response = requests.post(endpoint_url+"/upload", files={"image": image_data},json = params)
-
+    image_path = os.path.join(parent_dir, 'nft_photos/'+user.first_name+"_nft.jpg")
+    json = {
+    "image_path":image_path,
+    }
+    # Send image_path to endpoint
+    response = requests.post(endpoint_url+"/uploadImage", json = json)
+     
+    # Construct URI
+    image_CID = response.text
+    logger.info(
+        "Image uploaded at %s!",image_CID
+    )
+    image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=" +image_CID
+     # Set the parameters
+    params = {
+        "publicKey": address,
+        "title": title,
+        "symbol": symbol,
+        "image_URI": image_URI,
+    }
+    logger.info(
+        "Uploading Metadata..."
+    )
+    response = requests.post(endpoint_url+"/uploadData", json = params)
+    metadata_CID = response.text
+    logger.info(
+        "Metadata uploaded at %s!",metadata_CID
+    )
     logger.info(
         "address of %s: %s, nft title: %s, nft symbol: %s", user.first_name, address, title, symbol
     )
