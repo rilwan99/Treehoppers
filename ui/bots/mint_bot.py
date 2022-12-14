@@ -120,7 +120,9 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Create path where the image is located
     base_path = os.path.realpath(__file__)
-    image_path = os.path.join(base_path, 'nft_photos/')
+    parent_dir = os.path.dirname(base_path)
+    image_path = os.path.join(parent_dir, 'nft_photos/')
+    print(image_path)
     # Load the uploaded image from the user
     with open(image_path+user.first_name+"_nft.jpg", "rb") as image:
         image_data = image.read()
