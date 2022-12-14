@@ -17,15 +17,9 @@ dotenv.config();
 const app = express();
 const fs = require('fs');
 const pinataSDK = require('@pinata/sdk');
-const pinata = new pinataSDK({ pinataJWTKey: "YOUR_PINATA_KEY"});
+const pinata = new pinataSDK({ pinataJWTKey: "YOUR PINATA KEY"});
 
 app.use(bodyParser.json());
-
-//Testing endpoint to see if the post request works
-app.post('/', (req,res) => {
-  // Send a success message as a response
-  res.send('API called success');
-})
 
 app.get('/generateKey', (req, res) => {
   try {
@@ -49,6 +43,92 @@ app.get('/generateKey', (req, res) => {
     res.status(500).send({ error: err.message });
   }
 });
+
+app.post('/uploadImage', (req, res) => {
+  // this endpoint will receive an image path  
+  const image_path = req.body["image_path"]
+  const image = fs.createReadStream(image_path);
+  const options = {
+      pinataMetadata: {
+          name: "test"
+      },
+      pinataOptions: {
+          cidVersion: 0
+      }
+  };
+  pinata.pinFileToIPFS(image,options).then((result) => {
+      //handle results here
+      console.log(result);
+      // Index the data from the user
+      image_CID = result["IpfsHash"]
+      res.send(image_CID)
+  }).catch((err) => {
+      //handle error here
+      console.log(err);
+  });
+
+})
+
+app.post('/uploadData', (req,res) => {
+  // Construct URI, using IPFS browser gateway
+  image_URI = req.body["image_URI"]
+  title = req.body["title"]
+  symbol = req.body["symbol"]
+  const options = {
+    pinataMetadata: {
+        name: "test"
+    },
+    pinataOptions: {
+        cidVersion: 0
+    }
+  };
+  //Construct json meta data, with user params and ipfs cid from image
+  const metadata = {
+    "title": title,
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Identifies the asset to which this token represents"
+      },
+      "description": {
+        "type": "string",
+        "description": "Describes the asset to which this token represents"
+      },
+      "image": {
+        "type": "string",
+        "description": "A URI pointing to a resource with mime type image/* representing the asset to which this token represents. Consider making any images at a width between 320 and 1080 pixels and aspect ratio between 1.91:1 and 4:5 inclusive."
+      },
+      "external_url": {
+        "type": "string",
+        "description": image_URI
+      },
+      "seller_fee_basis_points": {
+        "type": "number"
+      },
+      "properties": {
+        "type": "object",
+        "description": "Arbitrary properties. Values may be strings, numbers, object or arrays.",
+        "properties": {
+          "creators": {
+            "type": "array",
+            "description": "Contains list of creators, each with Solana address and share of the nft"
+          }
+        }
+      }
+    }
+  }
+  // Upload metadata to ipfs
+  pinata.pinJSONToIPFS(metadata, options).then((result) => {
+    //handle results here
+    console.log(result);
+    res.send(result["IpfsHash"])
+
+    }).catch((err) => {
+    //handle error here
+    console.log(err);
+    });
+})
 
 // Set the route for the '/mint' endpoint
 app.post("/mint", (req, res) => {
@@ -194,92 +274,6 @@ const handleMintFunction = () => {
     );
   })()
 }
-
-app.post('/uploadImage', (req, res) => {
-  // this endpoint will receive an image path  
-  const image_path = req.body["image_path"]
-  const image = fs.createReadStream(image_path);
-  const options = {
-      pinataMetadata: {
-          name: "test"
-      },
-      pinataOptions: {
-          cidVersion: 0
-      }
-  };
-  pinata.pinFileToIPFS(image,options).then((result) => {
-      //handle results here
-      console.log(result);
-      // Index the data from the user
-      image_CID = result["IpfsHash"]
-      res.send(image_CID)
-  }).catch((err) => {
-      //handle error here
-      console.log(err);
-  });
-
-})
-
-app.post('/uploadData', (req,res) => {
-  // Construct URI, using IPFS browser gateway
-  image_URI = req.body["image_URI"]
-  title = req.body["title"]
-  symbol = req.body["symbol"]
-  const options = {
-    pinataMetadata: {
-        name: "test"
-    },
-    pinataOptions: {
-        cidVersion: 0
-    }
-  };
-  //Construct json meta data, with user params and ipfs cid from image
-  const metadata = {
-    "title": title,
-    "type": "object",
-    "properties": {
-      "name": {
-        "type": "string",
-        "description": "Identifies the asset to which this token represents"
-      },
-      "description": {
-        "type": "string",
-        "description": "Describes the asset to which this token represents"
-      },
-      "image": {
-        "type": "string",
-        "description": "A URI pointing to a resource with mime type image/* representing the asset to which this token represents. Consider making any images at a width between 320 and 1080 pixels and aspect ratio between 1.91:1 and 4:5 inclusive."
-      },
-      "external_url": {
-        "type": "string",
-        "description": image_URI
-      },
-      "seller_fee_basis_points": {
-        "type": "number"
-      },
-      "properties": {
-        "type": "object",
-        "description": "Arbitrary properties. Values may be strings, numbers, object or arrays.",
-        "properties": {
-          "creators": {
-            "type": "array",
-            "description": "Contains list of creators, each with Solana address and share of the nft"
-          }
-        }
-      }
-    }
-  }
-  // Upload metadata to ipfs
-  pinata.pinJSONToIPFS(metadata, options).then((result) => {
-    //handle results here
-    console.log(result);
-    res.send(result["IpfsHash"])
-
-    }).catch((err) => {
-    //handle error here
-    console.log(err);
-    });
-})
 
 // Start the Express.js web server
 app.listen(3000, () => console.log("Express.js API listening on port 3000"));

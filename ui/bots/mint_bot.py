@@ -79,6 +79,9 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.message.from_user
     user_response = update.message.text
 
+    await update.message.reply_text(
+        f"Awesome, give us a moment to generate a new wallet"
+    )
     logger.info(
         "Generating new key pair..."
     )
@@ -93,7 +96,6 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # print the public and private keys
         keys = response.json()
         print(keys['publicKey'])
-        print(keys['privateKey'])
         
     else:
         # print the error message
@@ -143,11 +145,11 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "Metadata uploaded at %s!",metadata_CID
     )
     logger.info(
-        "address of %s: %s, nft title: %s, nft symbol: %s", user.first_name, address, title, symbol
+        "address of %s: %s, nft title: %s, nft symbol: %s, ImageCID: %s, MetaDataCID: %s", user.first_name, address, title, symbol, image_CID, metadata_CID
     )
 
     await update.message.reply_text(
-        f"Awesome, now Minting NFT to {address} on {chain}"
+        f"Done! Now Minting NFT to your new wallet: {address} on {chain}"
     )
 
     # Send the request to mint
