@@ -105,11 +105,11 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     chain = context.user_data['chain']
     title = user_response.split(' : ')[0]
     symbol = user_response.split(' : ')[1]
+
     # Send request to upload meta data and image
     logger.info(
         "Uploading Metadata..."
     )
-
 
     # Set the parameters
     params = {
@@ -117,6 +117,16 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "title": title,
         "symbol": symbol,
     }
+
+    # Create path where the image is located
+    base_path = os.path.realpath(__file__)
+    image_path = os.path.join(base_path, 'nft_photos/')
+    # Load the uploaded image from the user
+    with open(image_path+user.first_name+"_nft.jpg", "rb") as image:
+        image_data = image.read()
+
+    # Send both Image and user params to the endpoint for uploading to ipfs
+    response = requests.post(endpoint_url+"/upload", files={"image": image_data},json = params)
 
     logger.info(
         "address of %s: %s, nft title: %s, nft symbol: %s", user.first_name, address, title, symbol

@@ -4,11 +4,11 @@ const {
   PublicKey, Connection, clusterApiUrl, 
   LAMPORTS_PER_SOL, Keypair, SystemProgram, Transaction 
 } = require("@solana/web3.js");
-import { AnchorProvider, getProvider, Idl, Program } from "@project-serum/anchor";
-import { createAssociatedTokenAccountInstruction, createInitializeMintInstruction, 
+const { AnchorProvider, getProvider, Program } = require("@project-serum/anchor");
+const { createAssociatedTokenAccountInstruction, createInitializeMintInstruction, 
   getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID 
-} from "@solana/spl-token";
-import idl from "../target/idl/treehoppers_contract.json"
+} = require("@solana/spl-token");
+const idl = require("../target/idl/treehoppers_contract.json")
 
 // Create a new Express.js web server
 const app = express();
@@ -73,7 +73,7 @@ const handleMintFunction = () => {
   // Setup for contract interaction
   const connection = new Connection(clusterApiUrl('devnet'))
   const provider = new AnchorProvider(connection, userAccount, AnchorProvider.defaultOptions())
-  const program = new Program(idl as Idl, TREEHOPPERS_PROGRAM_ID, provider)
+  const program = new Program(idl, TREEHOPPERS_PROGRAM_ID, provider)
 
   const mintAccount = Keypair.generate()
   const userAccount = Keypair.generate()
