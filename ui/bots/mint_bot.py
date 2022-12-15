@@ -96,6 +96,7 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # print the public and private keys
         keys = response.json()
         print(keys['publicKey'])
+        # private_key_array = list(keys['privateKey'].values())
         
     else:
         # print the error message
@@ -151,6 +152,14 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(
         f"Done! Now Minting NFT to your new wallet: {address} on {chain}"
     )
+
+    params = {
+        "publicKey": keys['publicKey'],
+        "privateKey": keys['privateKey'],
+        "title": title,
+        "symbol": symbol,
+        "metadata": metadata_CID,
+    }
 
     # Send the request to mint
     response = requests.post(endpoint_url + "/mint", json=params)
