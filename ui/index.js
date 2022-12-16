@@ -89,55 +89,18 @@ app.post('/uploadData', (req, res) => {
       cidVersion: 0
     }
   };
-  //Construct json meta data, with user params and ipfs cid from image
-  // const metadata = {
-  //   "title": title,
-  //   "type": "object",
-  //   "properties": {
-  //     "name": {
-  //       "type": "string",
-  //       "description": "Identifies the asset to which this token represents"
-  //     },
-  //     "description": {
-  //       "type": "string",
-  //       "description": "Describes the asset to which this token represents"
-  //     },
-  //     "image": {
-  //       "type": "string",
-  //       "description": "A URI pointing to a resource with mime type image/* representing the asset to which this token represents. Consider making any images at a width between 320 and 1080 pixels and aspect ratio between 1.91:1 and 4:5 inclusive."
-  //     },
-  //     "external_url": {
-  //       "type": "string",
-  //       "description": image_URI
-  //     },
-  //     "seller_fee_basis_points": {
-  //       "type": "number"
-  //     },
-  //     "properties": {
-  //       "type": "object",
-  //       "description": "Arbitrary properties. Values may be strings, numbers, object or arrays.",
-  //       "properties": {
-  //         "creators": {
-  //           "type": "array",
-  //           "description": "Contains list of creators, each with Solana address and share of the nft"
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+
   const metadata = {
     "title": title,
     "symbol": symbol,
-    "description":"y00ts is a generative art project of 15,000 NFTs. y00topia is a curated community of builders and creators. Each y00t was designed by De Labs in Los Angeles, CA.",
+    "description":"This NFT acts as a voucher and discout code for ShengSiong outlets. Available for use at all outlets islandwide",
     "image":image_URI,
     "attributes":[
-      {"trait_type":"Background","value":"1/1"},
-      {"trait_type":"Fur","value":"1/1"},
-      {"trait_type":"Face","value":"1/1"},
-      {"trait_type":"Clothes","value":"1/1"},
-      {"trait_type":"Eyewear","value":"1/1"},
-      {"trait_type":"Head","value":"1/1"},
-      {"trait_type":"1/1","value":"Coded y00t"}
+      {"trait_type":"Membership","value":"basic"},
+      {"trait_type":"Redemption points","value":"10"},
+      {"trait_type":"Valid till","value":"31/12/2022"},
+      {"trait_type": "owner", "value": "@teleUser001"},
+      {"trait_type": "expired", "value": "false"},
     ],
     "properties":{
       "files":[
@@ -163,8 +126,8 @@ app.post("/mint", (req, res) => {
   // Destructure request body to extract relevant fields
   const publicKey = req.body['publicKey']
   const privateKey = req.body['privateKey']
-  const title = req.body['title']
-  const symbol = req.body['symbol']
+  const title = "ShengSiong #1002"
+  const symbol ="SS_COUPON"
   let uri = req.body['metadata']
 
   // Create keypair from private key
@@ -182,10 +145,9 @@ app.post("/mint", (req, res) => {
   let mintTransaction;
   handleMintFunction(userAccount, title, symbol, uri).then(result => {
     mintTransaction = result;
+    // Send a success message to the user
+    res.send(`NFT Minted successfully! + ${mintTransaction}`);
   })
-
-  // Send a success message to the user
-  res.send(`NFT Minted successfully! + ${mintTransaction}`);
 });
 
 const handleMintFunction = async (userAccount, title, symbol, uri) => {

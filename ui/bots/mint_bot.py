@@ -28,56 +28,60 @@ CHAIN, PHOTO, METADATA, MINT, END = range(5)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
-    reply_keyboard = [["Solana", "Polygon", "Ethereum"]]
+    reply_keyboard = [["ShengSiong", "Grab", "NTUC"]]
 
     await update.message.reply_text(
         "Hi, I am the Treehopper. I can help you mint NFTs! "
         "Send /cancel to stop talking to me.\n\n"
-        "Firstly, which chain would you like to mint your NFT on?",
+        "Firstly, which coupon are you minting?",
         reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Solana/Polygon/Ethereum?"
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder="ShengSiong/Grab/NTUC?"
         ),
     )
 
     return CHAIN
 
 
-async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+# async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
-    # Stores the selected chain and asks for the NFT Photo
+#     # Stores the selected chain and asks for the NFT Photo
+#     user = update.message.from_user
+#     chain = update.message.text
+#     context.user_data['chain'] = chain
+#     logger.info("Coupon Selected by %s: %s", user.first_name, chain)
+    
+#     await update.message.reply_text(
+#         "Nice! please send me the NFT that you would like to mint: ",
+#         reply_markup=ReplyKeyboardRemove(),
+#     )
+
+#     return PHOTO
+
+
+# async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    
+#     # Stores photo and prompts for metadata
+#     user = update.message.from_user
+#     photo_file = await update.message.photo[-1].get_file()
+    
+#     await photo_file.download_to_drive(f"nft_photos/{user.first_name}_nft.jpg")
+#     logger.info("nft of %s: %s", user.first_name, f"{user.first_name}_nft.jpg")
+    
+#     await update.message.reply_text(
+#         "Looks great! Now, send me the title and symbol for your NFT in the following format:\n\n"
+#         "title : symbol"
+#     )
+
+#     return METADATA
+
+async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+
     user = update.message.from_user
     chain = update.message.text
     context.user_data['chain'] = chain
-    logger.info("Chain Selected by %s: %s", user.first_name, chain)
-    
-    await update.message.reply_text(
-        "Nice! please send me the NFT that you would like to mint: ",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    logger.info("Coupon Selected by %s: %s", user.first_name, chain)
 
-    return PHOTO
-
-
-async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    
-    # Stores photo and prompts for metadata
-    user = update.message.from_user
-    photo_file = await update.message.photo[-1].get_file()
-    
-    await photo_file.download_to_drive(f"nft_photos/{user.first_name}_nft.jpg")
-    logger.info("nft of %s: %s", user.first_name, f"{user.first_name}_nft.jpg")
-    
-    await update.message.reply_text(
-        "Looks great! Now, send me the title and symbol for your NFT in the following format:\n\n"
-        "title : symbol"
-    )
-
-    return METADATA
-
-async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-
-    user = update.message.from_user
-    user_response = update.message.text
+    # user_response = update.message.text
 
     await update.message.reply_text(
         f"Awesome, give us a moment to generate a new wallet"
@@ -106,35 +110,36 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     address = keys['publicKey']
     context.user_data['address'] = address
     chain = context.user_data['chain']
-    title = user_response.split(' : ')[0]
-    symbol = user_response.split(' : ')[1]
+    # title = user_response.split(' : ')[0]
+    # symbol = user_response.split(' : ')[1]
 
     # Send request to upload meta data and image
-    logger.info(
-        "Uploading Image..."
-    )
+    # logger.info(
+    #     "Uploading Image..."
+    # )
 
     # Create path where the image is located
-    base_path = os.path.realpath(__file__)
-    parent_dir = os.path.dirname(base_path)
-    image_path = os.path.join(parent_dir, 'nft_photos/'+user.first_name+"_nft.jpg")
-    json = {
-    "image_path":image_path,
-    }
+    # base_path = os.path.realpath(__file__)
+    # parent_dir = os.path.dirname(base_path)
+    # image_path = os.path.join(parent_dir, 'nft_photos/'+user.first_name+"_nft.jpg")
+    # json = {
+    # "image_path":image_path,
+    # }
     # Send image_path to endpoint
-    response = requests.post(endpoint_url+"/uploadImage", json = json)
+    # response = requests.post(endpoint_url+"/uploadImage", json = json)
      
     # Construct URI
     image_CID = response.text
     logger.info(
         "Image uploaded at %s!",image_CID
     )
-    image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=" +image_CID
+    # image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=" +image_CID
+    image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=QmTSANYSRFJz3SFg7pdkDx1FZdF53ZX77djNaKqNqdkM9q"
      # Set the parameters
     params = {
         "publicKey": address,
-        "title": title,
-        "symbol": symbol,
+        # "title": title,
+        # "symbol": symbol,
         "image_URI": image_URI,
     }
     logger.info(
@@ -145,19 +150,19 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     logger.info(
         "Metadata uploaded at %s!",metadata_CID
     )
-    logger.info(
-        "address of %s: %s, nft title: %s, nft symbol: %s, ImageCID: %s, MetaDataCID: %s", user.first_name, address, title, symbol, image_CID, metadata_CID
-    )
+    # logger.info(
+    #     "address of %s: %s, nft title: %s, nft symbol: %s, ImageCID: %s, MetaDataCID: %s", user.first_name, address, title, symbol, image_CID, metadata_CID
+    # )
 
     await update.message.reply_text(
-        f"Done! Now Minting NFT to your new wallet: {address} on {chain}"
+        f"Done! Now Minting NFT to your new wallet: {address}"
     )
 
     params = {
         "publicKey": keys['publicKey'],
         "privateKey": keys['privateKey'],
-        "title": title,
-        "symbol": symbol,
+        # "title": title,
+        # "symbol": symbol,
         "metadata": metadata_CID,
     }
 
@@ -167,8 +172,9 @@ async def metadata(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # Check the response
     if response.status_code == 200:
         print(response)
+        txn_hash = response.text
         await update.message.reply_text(
-        f"NFT Minted! You can view your NFT here: {address}"
+        f"NFT Minted! You can view your NFT here: {txn_hash}"
         )
     else:
         print("Error calling API: {}".format(response.text))
@@ -223,9 +229,9 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
-            CHAIN: [MessageHandler(filters.Regex("^(Solana|Polygon|Ethereum)$"), chain)],
-            PHOTO: [MessageHandler(filters.PHOTO, photo)],
-            METADATA: [MessageHandler(filters.Regex("^(.*):(.*)"), metadata)],
+            CHAIN: [MessageHandler(filters.Regex("^(ShengSiong|Grab|NTUC)$"), chain)],
+            # PHOTO: [MessageHandler(filters.PHOTO, photo)],
+            # METADATA: [MessageHandler(filters.Regex("^(.*):(.*)"), metadata)],
             END: [MessageHandler(filters.Regex("^(Yes|No)$"), end)],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
