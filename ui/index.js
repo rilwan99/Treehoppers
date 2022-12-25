@@ -139,14 +139,14 @@ app.post("/mint", (req, res) => {
   console.log(userAccount.publicKey.toString())
 
   // Convert IPFS hash to link
-  uri = "https://api.ipfsbrowser.com/ipfs/get.php?hash=" + uri
+  uri = "https://ipfs.io/ipfs/" + uri
   console.log(uri)
 
   let mintTransaction;
   handleMintFunction(userAccount, title, symbol, uri).then(result => {
     mintTransaction = result;
     // Send a success message to the user
-    res.send(`NFT Minted successfully! + ${mintTransaction}`);
+    res.send(`${mintTransaction}`);
   })
 });
 
@@ -263,16 +263,12 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
       .signers([userAccount])
       .rpc({ commitment: "processed" })
     console.log("Transaction Signature: ", mintTransaction)
-    console.log("NFT Token Account---")
-    console.log(
-      await program.provider.connection.getParsedAccountInfo(nftTokenAccount)
-    );
     return mintTransaction
   }
   await setUpWallet();
   const result = await mintNft();
 
-  return result
+  return mintAccount.publicKey.toString()
 }
 
 // Start the Express.js web server

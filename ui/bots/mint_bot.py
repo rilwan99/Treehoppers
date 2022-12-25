@@ -31,7 +31,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     reply_keyboard = [["ShengSiong", "Grab", "NTUC"]]
 
     await update.message.reply_text(
-        "Hi, I am the Treehopper. I can help you mint NFTs! "
+        "Hi, I am the Treehopper. I can help you mint NFT coupons/vouchers! "
         "Send /cancel to stop talking to me.\n\n"
         "Firstly, which coupon are you minting?",
         reply_markup=ReplyKeyboardMarkup(
@@ -133,8 +133,8 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     logger.info(
         "Image uploaded at %s!",image_CID
     )
-    # image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=" +image_CID
-    image_URI = "https://api.ipfsbrowser.com/ipfs/get.php?hash=QmTSANYSRFJz3SFg7pdkDx1FZdF53ZX77djNaKqNqdkM9q"
+    # image_URI = "https://ipfs.io/ipfs/" +image_CID
+    image_URI = "https://ipfs.io/ipfs/QmTSANYSRFJz3SFg7pdkDx1FZdF53ZX77djNaKqNqdkM9q"
      # Set the parameters
     params = {
         "publicKey": address,
@@ -173,8 +173,11 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if response.status_code == 200:
         print(response)
         txn_hash = response.text
+        # Example Hash
+        # https://solana.fm/address/67tRjzCsmYwXXDSwkwKCV7vNKRW8dCqJRS2WC6eVBEDr?cluster=devnet-qn1
+        nft_url = "https://solana.fm/address/" + txn_hash + "?cluster=devnet-qn1"
         await update.message.reply_text(
-        f"NFT Minted! You can view your NFT here: {txn_hash}"
+        f"NFT Minted! You can view your NFT here: {nft_url}"
         )
     else:
         print("Error calling API: {}".format(response.text))
