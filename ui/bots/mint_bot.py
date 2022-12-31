@@ -97,8 +97,13 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # Set the endpoint URL, local for now
     endpoint_url = "http://localhost:3000"
 
+    params_key = {
+        "id": user_id,
+        "handle": user_handle,
+    }
+
     # Send request to generate Key pair
-    response = requests.get(endpoint_url+'/generateKey')
+    response = requests.post(endpoint_url+'/generateKey',json=params_key)
     # check the response status code
     if response.status_code == 200:
         # print the public and private keys
