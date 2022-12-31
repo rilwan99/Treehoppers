@@ -2,7 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const idl = require("../target/idl/treehoppers_contract.json")
 require("dotenv").config({ path: "../.env" });
-import { initializeApp } from "firebase/app";
+const firebase = require("firebase/app");
+const initializeApp = firebase.initializeApp;
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
   SystemProgram, Transaction, SYSVAR_RENT_PUBKEY
@@ -30,7 +31,6 @@ const firebaseConfig = {
   measurementId: "G-3E4JJ06RHQ"
 };
 const firebaseApp = initializeApp(firebaseConfig);
-
 
 // Create a new Express.js web server
 const app = express();

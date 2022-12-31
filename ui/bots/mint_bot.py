@@ -197,6 +197,9 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     return END
 
+async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    pass
+
 
 async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     choice = update.message.text
