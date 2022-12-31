@@ -3,7 +3,9 @@ const bodyParser = require("body-parser");
 const idl = require("../target/idl/treehoppers_contract.json")
 require("dotenv").config({ path: "../.env" });
 const firebase = require("firebase/app");
-const initializeApp = firebase.initializeApp;
+
+const { initializeApp } = require("firebase/app");
+const { collection, doc, getDoc, setDoc, getFirestore } = require("firebase/firestore"); 
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
   SystemProgram, Transaction, SYSVAR_RENT_PUBKEY
@@ -20,6 +22,14 @@ const {
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
 const JWT = process.env.JWT;
 
+// Create a new Express.js web server
+const app = express();
+const fs = require('fs');
+const pinataSDK = require('@pinata/sdk');
+const { setDefaultResultOrder } = require("dns");
+const { default: NodeWallet } = require("@project-serum/anchor/dist/cjs/nodewallet");
+const pinata = new pinataSDK({ pinataJWTKey: JWT });
+
 // Initailize Firebase app
 const firebaseConfig = {
   apiKey: "AIzaSyDPU4hsOOXzMJ7dkRYQHVsn_t-4WVJui2o",
@@ -31,34 +41,65 @@ const firebaseConfig = {
   measurementId: "G-3E4JJ06RHQ"
 };
 const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
-// Create a new Express.js web server
-const app = express();
-const fs = require('fs');
-const pinataSDK = require('@pinata/sdk');
-const { setDefaultResultOrder } = require("dns");
-const { default: NodeWallet } = require("@project-serum/anchor/dist/cjs/nodewallet");
-const pinata = new pinataSDK({ pinataJWTKey: JWT });
+const getKeysFirebase = async(telegramUserId) => {
+  try {
+    const docRef = doc(db, "UserCollection", telegramUserId.toString());
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      console.log(`User ${telegramUserId} has not wallet!`);
+    }
+  }
+  catch (err) {
+    console.log(err)
+  }
+}
+
+const insertKeysFirebase = async(userId, userHandle, publicKey, secretKey) => {
+  try {
+    docData = {publicKey: publicKey.toString(), privateKey: Array.from(secretKey), username: userHandle}
+    await setDoc(doc(db, "UserCollection", userId.toString()), docData)
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 app.use(bodyParser.json());
 
-app.get('/generateKey', (req, res) => {
+app.get('/retrieveKey', (req, res) => {
+  try {
+    const telegramUserId = req.body["id"]
+    getKeysFirebase(telegramUserId).then(
+      result => {
+      res.send({
+        publicKey: result.publicKey,
+        privateKey: result.privateKey,
+      })
+    });
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+app.post('/generateKey', (req, res) => {
   try {
     // generate a new key pair
     const keypair = new Keypair();
     const publicKey = keypair.publicKey
     const secretKey = keypair.secretKey
 
-    console.log(publicKey)
-    console.log(secretKey)
-    // store the keys in a text file locally
-    fs.writeFileSync('keys.txt', `Public key: ${publicKey}\nPrivate key: ${secretKey}`);
+    const userId = req.body['id']
+    const userHandle = req.body['handle']
 
-    // return the public and private keys
-    res.send({
-      publicKey: keypair.publicKey,
-      privateKey: keypair.secretKey,
-    });
+    insertKeysFirebase(userId, userHandle, publicKey, secretKey).then(
+        res.send({
+          publicKey: publicKey,
+          privateKey: secretKey
+        })
+      );
   } catch (err) {
     // handle errors
     res.status(500).send({ error: err.message });

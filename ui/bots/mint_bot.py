@@ -103,12 +103,12 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     }
 
     # Send request to generate Key pair
-    response = requests.post(endpoint_url+'/generateKey',json=params_key)
+    response = requests.post(endpoint_url+'/retrieveKey',json=params_key)
     # check the response status code
     if response.status_code == 200:
         # print the public and private keys
         keys = response.json()
-        print(keys['publicKey'])
+        print("public key" + keys['publicKey'])
         # private_key_array = list(keys['privateKey'].values())
         
     else:
