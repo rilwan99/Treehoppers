@@ -1,5 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const idl = require("../target/idl/treehoppers_contract.json")
+require("dotenv").config({ path: "../.env" });
+import { initializeApp } from "firebase/app";
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
   SystemProgram, Transaction, SYSVAR_RENT_PUBKEY
@@ -11,12 +14,23 @@ const {
   createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
   getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID
 } = require("@solana/spl-token");
-const idl = require("../target/idl/treehoppers_contract.json")
-require("dotenv").config({ path: "../.env" });
 
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
 const JWT = process.env.JWT;
+
+// Initailize Firebase app
+const firebaseConfig = {
+  apiKey: "AIzaSyDPU4hsOOXzMJ7dkRYQHVsn_t-4WVJui2o",
+  authDomain: "treehoppers-2d811.firebaseapp.com",
+  projectId: "treehoppers-2d811",
+  storageBucket: "treehoppers-2d811.appspot.com",
+  messagingSenderId: "121650851156",
+  appId: "1:121650851156:web:4c3046302f894cdc336cc1",
+  measurementId: "G-3E4JJ06RHQ"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+
 
 // Create a new Express.js web server
 const app = express();
