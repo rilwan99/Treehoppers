@@ -81,6 +81,10 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     context.user_data['chain'] = chain
     logger.info("Coupon Selected by %s: %s", user.first_name, chain)
 
+    # user id and user handle that will be added to the firebase db later under users
+    user_id = update.effective_user.id
+    user_handle = update.effective_user.username
+
     # user_response = update.message.text
 
     await update.message.reply_text(
