@@ -126,7 +126,6 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # private_key_array = list(keys['privateKey'].values())
         
     else:
-        # print the error message
         print(response.json()['error'])
     
     # Formats users response
@@ -251,9 +250,7 @@ async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # check the response status code
     if response.status_code == 200:
-        # print the public and private keys
         keys = response.json()
-        print("public key" + keys['publicKey'])
         # private_key_array = list(keys['privateKey'].values())
         
     else:
@@ -281,11 +278,10 @@ async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # check the response status code
     if response.status_code == 200:
         # print the public and private keys
-        keys = response.json()
-        result = keys['output']
-        # private_key_array = list(keys['privateKey'].values())
+        nfts = response.json()
+        # result = keys['output']
         await update.message.reply_text(
-              f"{result}"
+              f"{nfts}"
           )
     else:
         # print the error message

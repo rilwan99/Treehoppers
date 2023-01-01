@@ -9,7 +9,6 @@ const { collection, doc, getDoc, setDoc, getFirestore } = require("firebase/fire
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
   SystemProgram, Transaction, SYSVAR_RENT_PUBKEY } = require("@solana/web3.js");
-// const Web3 = require("solana-web3.js");
 const {
   AnchorProvider, Program,
 } = require("@project-serum/anchor");
@@ -17,12 +16,7 @@ const {
   createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
   getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID
 } = require("@solana/spl-token");
-
-// const web3 = new Web3(
-//   new Web3.providers.HttpProvider(
-//     "https://late-distinguished-general.solana-devnet.discover.quiknode.pro/d7e1ed8a5057e4ac0996acc6fe9f7017b0e7048d/"
-//   )
-// );
+const { Metaplex } = require("@metaplex-foundation/js")
 
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
@@ -106,25 +100,21 @@ const getKeysFirebase = async (telegramUserId, telegramUserName) => {
 };
 
 const getNFTList = async (publicKey) => {
-  return 'Still a Work in Progress :('
-  // const account = await web3.solana.getAccount(publicKey);
-  // const nft = web3.solana.decodeNFToken(account.data);
-  // return nft;
-
-  // // Connect to the Solana cluster
-  // const connection = new Connection('https://testnet.solana.com');
-
-  // // Get the account data for the given account
-  // const accountData = await connection.getAccountInfo(account);
-
-  // // Get the account's data as a buffer
-  // const accountBuffer = await accountData.data;
-
-  // // Parse the account data to get the list of NFTs
-  // const nftList = parseNFTList(accountBuffer);
-
-  // return nftList;
-};
+  const connection = new Connection(clusterApiUrl('devnet'))
+  const metaplex = new Metaplex(connection)
+  const myNfts = await metaplex.nfts().findAllByOwner({
+    owner: publicKey
+  });
+  const nftInfoArray = []
+  myNfts.forEach(nftMetadata => {
+    nftInfoArray.push({
+      name: nftMetadata.name, 
+      symbol: nftMetadata.symbol, 
+      mintAddress: nftMetadata.mintAddress.toString() 
+    })
+  })
+  return nftInfoArray
+}
 
 app.use(bodyParser.json());
 
@@ -146,12 +136,11 @@ app.post('/retrieveKey', (req, res) => {
 
 app.post("/coupons", (req, res) => {
   try {
-    const publicKey = req.body["publicKey"];
+    // const privateKey = req.body["privateKey"];
+    const publicKey = new PublicKey(req.body["publicKey"])
     getNFTList(publicKey).then((result) => {
       console.log(result);
-      res.send({
-        output: result,
-      });
+      res.send(result);
     });
   } catch (err) {
     console.log(err);
