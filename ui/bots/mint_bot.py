@@ -27,6 +27,20 @@ logger = logging.getLogger(__name__)
 CHAIN, PHOTO, METADATA, MINT, END = range(5)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text(
+        "/mint - Allows you to mint new coupons \n"
+        "/redeem - Allows you to see your current coupons \n"
+        "/help - to see helpful commands",
+        )
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text(
+        "/mint - Allows you to mint new coupons \n"
+        "/redeem - Allows you to see your current coupons \n"
+        "/help - to see helpful commands",
+        )
+
+async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     reply_keyboard = [["ShengSiong", "Grab", "NTUC"]]
 
@@ -40,7 +54,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
 
     return CHAIN
-
 
 # async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
@@ -88,10 +101,10 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # user_response = update.message.text
 
     await update.message.reply_text(
-        f"Awesome, give us a moment to generate a new wallet"
+        f"Awesome, give us a moment to check if you have a wallet"
     )
     logger.info(
-        "Generating new key pair..."
+        "Checking Records..."
     )
     # Post request to Express API
     # Set the endpoint URL, local for now
@@ -104,6 +117,7 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Send request to generate Key pair
     response = requests.post(endpoint_url+'/retrieveKey',json=params_key)
+
     # check the response status code
     if response.status_code == 200:
         # print the public and private keys
@@ -117,6 +131,9 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     # Formats users response
     address = keys['publicKey']
+    walletStatus = keys['walletStatus']
+    print(walletStatus)
+
     context.user_data['address'] = address
     chain = context.user_data['chain']
     # title = user_response.split(' : ')[0]
@@ -162,10 +179,14 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     # logger.info(
     #     "address of %s: %s, nft title: %s, nft symbol: %s, ImageCID: %s, MetaDataCID: %s", user.first_name, address, title, symbol, image_CID, metadata_CID
     # )
-
-    await update.message.reply_text(
-        f"Done! Now Minting NFT to your new wallet: {address}"
-    )
+    if walletStatus == True:
+      await update.message.reply_text(
+          f"You don't have a wallet! Creating and minting the NFT to your new wallet: {address}"
+      )
+    else:
+      await update.message.reply_text(
+          f"You have an existing wallet! Now minting the NFT to your wallet: {address}"
+      )
 
     params = {
         "publicKey": keys['publicKey'],
@@ -202,9 +223,75 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     return END
 
-async def send(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    pass
+async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
+    # user id and user handle that will be added to the firebase db later under users
+    user_id = update.effective_user.id
+    user_handle = update.effective_user.username
+
+    # user_response = update.message.text
+
+    await update.message.reply_text(
+        f"Awesome, give us a moment to check if you have any Coupons available to redeem"
+    )
+    logger.info(
+        "Checking Records..."
+    )
+    # Post request to Express API
+    # Set the endpoint URL, local for now
+    endpoint_url = "http://localhost:3000"
+
+    params_key = {
+        "id": user_id,
+        "handle": user_handle,
+    }
+
+    # Send request to generate Key pair
+    response = requests.post(endpoint_url+'/retrieveKey',json=params_key)
+
+    # check the response status code
+    if response.status_code == 200:
+        # print the public and private keys
+        keys = response.json()
+        print("public key" + keys['publicKey'])
+        # private_key_array = list(keys['privateKey'].values())
+        
+    else:
+        # print the error message
+        print(response.json()['error'])
+    
+    address = keys['publicKey']
+    walletStatus = keys['walletStatus']
+
+    if walletStatus == True:
+      await update.message.reply_text(
+          f"You don't have a wallet! Creating a new wallet for your account: {address}"
+      )
+    else:
+      await update.message.reply_text(
+          f"You have an existing wallet! Checking if you have any coupons in your wallet: {address}"
+      )
+
+    params = {
+        "publicKey": address,
+    }
+
+    response = requests.post(endpoint_url+"/coupons", json = params)
+
+    # check the response status code
+    if response.status_code == 200:
+        # print the public and private keys
+        keys = response.json()
+        result = keys['output']
+        # private_key_array = list(keys['privateKey'].values())
+        await update.message.reply_text(
+              f"{result}"
+          )
+    else:
+        # print the error message
+        print(response.json()['error'])
+
+# ----- Deprecated for Personal NFT Minting -----
 
 async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     choice = update.message.text
@@ -223,6 +310,7 @@ async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return ConversationHandler.END
 
+# ----- Deprecated for Personal NFT Minting -----
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
@@ -242,7 +330,7 @@ def main() -> None:
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[CommandHandler("start", start),CommandHandler("help", help),CommandHandler("mint", mint),CommandHandler("redeem",redeem)],
         states={
             CHAIN: [MessageHandler(filters.Regex("^(ShengSiong|Grab|NTUC)$"), chain)],
             # PHOTO: [MessageHandler(filters.PHOTO, photo)],

@@ -8,8 +8,8 @@ const { initializeApp } = require("firebase/app");
 const { collection, doc, getDoc, setDoc, getFirestore } = require("firebase/firestore"); 
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
-  SystemProgram, Transaction, SYSVAR_RENT_PUBKEY
-} = require("@solana/web3.js");
+  SystemProgram, Transaction, SYSVAR_RENT_PUBKEY } = require("@solana/web3.js");
+// const Web3 = require("solana-web3.js");
 const {
   AnchorProvider, Program,
 } = require("@project-serum/anchor");
@@ -17,6 +17,12 @@ const {
   createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
   getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID
 } = require("@solana/spl-token");
+
+// const web3 = new Web3(
+//   new Web3.providers.HttpProvider(
+//     "https://late-distinguished-general.solana-devnet.discover.quiknode.pro/d7e1ed8a5057e4ac0996acc6fe9f7017b0e7048d/"
+//   )
+// );
 
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
@@ -43,68 +49,138 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-const getKeysFirebase = async(telegramUserId) => {
+const insertKeysFirebase = async (userId, userHandle) => {
+  try {
+    // generate a new key pair
+    const keypair = new Keypair();
+    const publicKey = keypair.publicKey;
+    const secretKey = keypair.secretKey;
+    //move this from generate keys endpoint to here
+
+    docData = {
+      publicKey: publicKey.toString(),
+      privateKey: Array.from(secretKey),
+      username: userHandle,
+    };
+    await setDoc(doc(db, "UserCollection", userId.toString()), docData);
+
+    docDataNew = {
+      publicKey: publicKey.toString(),
+      privateKey: Array.from(secretKey),
+      username: userHandle,
+      new_wallet: true, // for the telegram bot side if its a new wallet, we will send a different message
+    };
+
+    console.log("-----------------");
+    console.log(docDataNew);
+    console.log("-----------------");
+  
+    return docDataNew;
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getKeysFirebase = async (telegramUserId, telegramUserName) => {
   try {
     const docRef = doc(db, "UserCollection", telegramUserId.toString());
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data();
+      console.log(`User ${telegramUserId} has an existing wallet!`);
+      docData = docSnap.data();
+      docData["new_wallet"] = false; // for the telegram bot side if its a new wallet, we will send a different message
+      console.log("-----------------");
+      console.log(docData);
+      console.log("-----------------");
+      return docData;
     } else {
-      console.log(`User ${telegramUserId} has not wallet!`);
+      // creating new keys if the user does not have a wallet
+      console.log(`User ${telegramUserId} has no wallet!`);
+      console.log("Creating a new wallet for the user!");
+      return insertKeysFirebase(telegramUserId, telegramUserName);
     }
-  }
-  catch (err) {
-    console.log(err)
-  }
-}
-
-const insertKeysFirebase = async(userId, userHandle, publicKey, secretKey) => {
-  try {
-    docData = {publicKey: publicKey.toString(), privateKey: Array.from(secretKey), username: userHandle}
-    await setDoc(doc(db, "UserCollection", userId.toString()), docData)
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
-}
+};
+
+const getNFTList = async (publicKey) => {
+  return 'Still a Work in Progress :('
+  // const account = await web3.solana.getAccount(publicKey);
+  // const nft = web3.solana.decodeNFToken(account.data);
+  // return nft;
+
+  // // Connect to the Solana cluster
+  // const connection = new Connection('https://testnet.solana.com');
+
+  // // Get the account data for the given account
+  // const accountData = await connection.getAccountInfo(account);
+
+  // // Get the account's data as a buffer
+  // const accountBuffer = await accountData.data;
+
+  // // Parse the account data to get the list of NFTs
+  // const nftList = parseNFTList(accountBuffer);
+
+  // return nftList;
+};
 
 app.use(bodyParser.json());
 
-app.get('/retrieveKey', (req, res) => {
+app.post('/retrieveKey', (req, res) => {
   try {
     const telegramUserId = req.body["id"]
-    getKeysFirebase(telegramUserId).then(
-      result => {
+    const telegramUserName = req.body["handle"];
+    getKeysFirebase(telegramUserId, telegramUserName).then((result) => {
       res.send({
         publicKey: result.publicKey,
         privateKey: result.privateKey,
-      })
+        walletStatus: result.new_wallet,
+      });
     });
   } catch (err) {
     console.log(err)
   }
 })
 
-app.post('/generateKey', (req, res) => {
+app.post("/coupons", (req, res) => {
   try {
-    // generate a new key pair
-    const keypair = new Keypair();
-    const publicKey = keypair.publicKey
-    const secretKey = keypair.secretKey
-
-    const userId = req.body['id']
-    const userHandle = req.body['handle']
-
-    insertKeysFirebase(userId, userHandle, publicKey, secretKey).then(
-        res.send({
-          publicKey: publicKey,
-          privateKey: secretKey
-        })
-      );
+    const publicKey = req.body["publicKey"];
+    getNFTList(publicKey).then((result) => {
+      console.log(result);
+      res.send({
+        output: result,
+      });
+    });
   } catch (err) {
-    // handle errors
-    res.status(500).send({ error: err.message });
+    console.log(err);
   }
 });
+
+// app.post('/generateKey', (req, res) => {
+//   try {
+    // generate a new key pair
+    // const keypair = new Keypair();
+    // const publicKey = keypair.publicKey
+    // const secretKey = keypair.secretKey
+    // move to insert keys function
+
+//     const userId = req.body['id']
+//     const userHandle = req.body['handle']
+
+//     insertKeysFirebase(userId, userHandle).then(
+//       result => {
+//       res.send({
+//         publicKey: result.publicKey,
+//         privateKey: result.privateKey,
+//       })
+//     });
+//   } catch (err) {
+//     // handle errors
+//     res.status(500).send({ error: err.message });
+//   }
+// });
 
 app.post('/uploadImage', (req, res) => {
   // this endpoint will receive an image path  
