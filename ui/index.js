@@ -94,13 +94,26 @@ const getMerchantsFirebase = async () => {
     const querySnapshot = await getDocs(collection(db, "MerchantCollection"));
     const merchantIds = []
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data());
-      console.log(typeof(doc.id))
       merchantIds.push(doc.id)
     })
     return merchantIds
   } catch (err) {
     console.log("Firebase error", err)
+  }
+}
+
+const getMerchantInfoFirebase = async (merchantId) => {
+  try {
+    const docRef = doc(db, "MerchantCollection", merchantId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      docData = docSnap.data();
+      return docData
+    } else {
+      console.log("Invalid Merhcant ID provided")
+    }
+  } catch (err) {
+    console.log(err)
   }
 }
 
@@ -202,50 +215,42 @@ app.post('/uploadData', (req, res) => {
   };
 
   const metadata = {
-    "title": title,
-    "symbol": symbol,
-    "description":"This NFT acts as a voucher and discout code for ShengSiong outlets. Available for use at all outlets islandwide",
-    "image":image_URI,
+    "title": "Grab Voucher",
+    "symbol": "Grab #001",
+    "description":"Grab voucher available for in-app use as well as live redemption during trips",
+    "image": "https://ipfs.io/ipfs/QmV1EYP9co69TVGF2GXzbyVXUrSXuJnGYje7JzQrzpDngY",
     "attributes":[
       {"trait_type":"Membership","value":"basic"},
       {"trait_type":"Redemption points","value":"10"},
       {"trait_type":"Valid till","value":"31/12/2022"},
-      {"trait_type": "owner", "value": "@teleUser001"},
+      {"trait_type": "owner", "value": "@jackDorsey101"},
       {"trait_type": "expired", "value": "false"},
     ],
     "properties":{
       "files":[
-        {"uri":image_URI,
+        {"uri": "https://ipfs.io/ipfs/QmV1EYP9co69TVGF2GXzbyVXUrSXuJnGYje7JzQrzpDngY",
         "type":"image/png"}
       ],"category":null}}
   // Upload metadata to ipfs
-  pinata.pinJSONToIPFS(metadata, options).then((result) => {
-    //handle results here
-    console.log(result);
+  pinata.pinJSONToIPFS(metadata, options)
+  .then((result) =>  {
+    console.log(result)
     res.send(result["IpfsHash"])
-
-  }).catch((err) => {
-    //handle error here
-    console.log(err);
-  });
+  })
+  .catch((err) => console.log(err));
 })
 
-// Set the route for the '/mint' endpoint
 app.post("/mint", (req, res) => {
-  console.log("/mint endpoint---------")
 
-  // Destructure request body to extract relevant fields
   const publicKey = req.body['publicKey']
   const privateKey = req.body['privateKey']
+  let merchantId = req.body['MerchantId']
+  merchantId = 'Grab' // To Remove
 
-  // Retrieve from firebase instead
-  const title = "ShengSiong #1002"
-  const symbol ="SS_COUPON"
-  let uri = req.body['metadata']
-
-  // Convert IPFS hash to link
-  uri = "https://ipfs.io/ipfs/" + uri
-  console.log(uri)
+  let mintTransaction;
+  let title;
+  let symbol;
+  let uri;
 
   // Create keypair from private key
   const privateKeyArray = Uint8Array.from(
@@ -253,10 +258,20 @@ app.post("/mint", (req, res) => {
   );
   const userAccount = Keypair.fromSecretKey(privateKeyArray)
 
-  let mintTransaction;
-  handleMintFunction(userAccount, title, symbol, uri).then(result => {
+  getMerchantInfoFirebase(merchantId)
+  .then(result => {
+    title = result.Title;
+    symbol = result.Symbol;
+    uri = "https://ipfs.io/ipfs/" + result.URI;
+  })
+  .then(() => {
+    console.log(title)
+    console.log(symbol)
+    console.log(uri)
+    handleMintFunction(userAccount, title, symbol, uri)
+  })
+  .then(result => {
     mintTransaction = result;
-    // Send a success message to the user
     res.send(`${mintTransaction}`);
   })
 });
@@ -307,8 +322,8 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
   const setUpWallet = async () => {
     // Create Account for user
     const customConnection = new Connection(CUSTOM_DEVNET_RPC)
-    const airdrop = await customConnection.requestAirdrop(userAccount.publicKey, 2 * LAMPORTS_PER_SOL)
-    console.log("Airdrop transaction: ", airdrop)
+    // const airdrop = await customConnection.requestAirdrop(userAccount.publicKey, 2 * LAMPORTS_PER_SOL)
+    // console.log("Airdrop transaction: ", airdrop)
     const balance = await customConnection.getBalance(userAccount.publicKey)
     console.log("User Account balance: ", balance / LAMPORTS_PER_SOL)
 
@@ -343,7 +358,7 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
       initializeMintInstruction,
       createAtaInstruction
     )
-    const response = await provider.sendAndConfirm(transactions, [mintAccount, userAccount]);
+    const response = await provider.sendAndConfirm(transactions, [mintAccount, userAccount], {commitment: "processed"});
 
     console.log("Transaction Signature: ", response);
     console.log("Mint Account address: ", mintAccount.publicKey.toString());
