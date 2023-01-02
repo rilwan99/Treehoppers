@@ -41,7 +41,16 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
 
 async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    endpoint_url = "http://localhost:3000"
+    response = requests.get(endpoint_url+'/retrieveMerchants')
 
+    if response.status_code == 200:
+        result = response.json()
+        print("Response result")
+    else:
+        print(response.json()['error'])
+
+    ## ToDo: Modify options based on response result
     reply_keyboard = [["ShengSiong", "Grab", "NTUC"]]
 
     await update.message.reply_text(
@@ -55,7 +64,7 @@ async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     return CHAIN
 
-# async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+# async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
 #     # Stores the selected chain and asks for the NFT Photo
 #     user = update.message.from_user
@@ -79,6 +88,28 @@ async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
 #     await photo_file.download_to_drive(f"nft_photos/{user.first_name}_nft.jpg")
 #     logger.info("nft of %s: %s", user.first_name, f"{user.first_name}_nft.jpg")
+
+#     # Send request to upload meta data and image
+#     logger.info(
+#         "Uploading Image..."
+#     )
+
+#     # Create path where the image is located
+#     base_path = os.path.realpath(__file__)
+#     parent_dir = os.path.dirname(base_path)
+#     image_path = os.path.join(parent_dir, 'nft_photos/'+user.first_name+"_nft.jpg")
+#     json = {
+#     "image_path":image_path,
+#     }
+#     # Send image_path to endpoint
+#     endpoint_url = "http://localhost:3000"
+#     response = requests.post(endpoint_url+"/uploadImage", json = json)
+     
+#     # Construct URI
+#     image_CID = response.text
+#     logger.info(
+#         "Image uploaded at %s!",image_CID
+#     )
     
 #     await update.message.reply_text(
 #         "Looks great! Now, send me the title and symbol for your NFT in the following format:\n\n"
@@ -326,7 +357,13 @@ def main() -> None:
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start),CommandHandler("help", help),CommandHandler("mint", mint),CommandHandler("redeem",redeem)],
+        entry_points=[
+            CommandHandler("start", start),
+            CommandHandler("help", help),
+            CommandHandler("mint", mint),
+            CommandHandler("redeem",redeem), 
+            # CommandHandler("upload", upload)
+            ],
         states={
             CHAIN: [MessageHandler(filters.Regex("^(ShengSiong|Grab|NTUC)$"), chain)],
             # PHOTO: [MessageHandler(filters.PHOTO, photo)],

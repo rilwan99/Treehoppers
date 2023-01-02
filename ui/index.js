@@ -5,7 +5,8 @@ require("dotenv").config({ path: "../.env" });
 const firebase = require("firebase/app");
 
 const { initializeApp } = require("firebase/app");
-const { collection, doc, getDoc, setDoc, getFirestore } = require("firebase/firestore"); 
+const { collection, doc, getDoc, getDocs, setDoc, 
+  getFirestore } = require("firebase/firestore"); 
 const {
   PublicKey, Connection, clusterApiUrl, LAMPORTS_PER_SOL, Keypair, 
   SystemProgram, Transaction, SYSVAR_RENT_PUBKEY } = require("@solana/web3.js");
@@ -45,11 +46,9 @@ const db = getFirestore(firebaseApp);
 
 const insertKeysFirebase = async (userId, userHandle) => {
   try {
-    // generate a new key pair
     const keypair = new Keypair();
     const publicKey = keypair.publicKey;
     const secretKey = keypair.secretKey;
-    //move this from generate keys endpoint to here
 
     docData = {
       publicKey: publicKey.toString(),
@@ -64,11 +63,6 @@ const insertKeysFirebase = async (userId, userHandle) => {
       username: userHandle,
       new_wallet: true, // for the telegram bot side if its a new wallet, we will send a different message
     };
-
-    console.log("-----------------");
-    console.log(docDataNew);
-    console.log("-----------------");
-  
     return docDataNew;
 
   } catch (err) {
@@ -83,21 +77,32 @@ const getKeysFirebase = async (telegramUserId, telegramUserName) => {
     if (docSnap.exists()) {
       console.log(`User ${telegramUserId} has an existing wallet!`);
       docData = docSnap.data();
-      docData["new_wallet"] = false; // for the telegram bot side if its a new wallet, we will send a different message
-      console.log("-----------------");
-      console.log(docData);
-      console.log("-----------------");
+      // for the telegram bot side if its a new wallet, we will send a different message
+      docData["new_wallet"] = false;
       return docData;
     } else {
       // creating new keys if the user does not have a wallet
-      console.log(`User ${telegramUserId} has no wallet!`);
-      console.log("Creating a new wallet for the user!");
       return insertKeysFirebase(telegramUserId, telegramUserName);
     }
   } catch (err) {
     console.log(err);
   }
 };
+
+const getMerchantsFirebase = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "MerchantCollection"));
+    const merchantIds = []
+    querySnapshot.forEach((doc) => {
+      console.log(doc.id, " => ", doc.data());
+      console.log(typeof(doc.id))
+      merchantIds.push(doc.id)
+    })
+    return merchantIds
+  } catch (err) {
+    console.log("Firebase error", err)
+  }
+}
 
 const getNFTList = async (publicKey) => {
   const connection = new Connection(clusterApiUrl('devnet'))
@@ -134,6 +139,16 @@ app.post('/retrieveKey', (req, res) => {
   }
 })
 
+app.get('/retrieveMerchants', (req, res) => {
+  try {
+    getMerchantsFirebase().then(result => {
+      res.send({merchantList: result})
+    })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
 app.post("/coupons", (req, res) => {
   try {
     // const privateKey = req.body["privateKey"];
@@ -146,30 +161,6 @@ app.post("/coupons", (req, res) => {
     console.log(err);
   }
 });
-
-// app.post('/generateKey', (req, res) => {
-//   try {
-    // generate a new key pair
-    // const keypair = new Keypair();
-    // const publicKey = keypair.publicKey
-    // const secretKey = keypair.secretKey
-    // move to insert keys function
-
-//     const userId = req.body['id']
-//     const userHandle = req.body['handle']
-
-//     insertKeysFirebase(userId, userHandle).then(
-//       result => {
-//       res.send({
-//         publicKey: result.publicKey,
-//         privateKey: result.privateKey,
-//       })
-//     });
-//   } catch (err) {
-//     // handle errors
-//     res.status(500).send({ error: err.message });
-//   }
-// });
 
 app.post('/uploadImage', (req, res) => {
   // this endpoint will receive an image path  
@@ -246,21 +237,21 @@ app.post("/mint", (req, res) => {
   // Destructure request body to extract relevant fields
   const publicKey = req.body['publicKey']
   const privateKey = req.body['privateKey']
+
+  // Retrieve from firebase instead
   const title = "ShengSiong #1002"
   const symbol ="SS_COUPON"
   let uri = req.body['metadata']
+
+  // Convert IPFS hash to link
+  uri = "https://ipfs.io/ipfs/" + uri
+  console.log(uri)
 
   // Create keypair from private key
   const privateKeyArray = Uint8Array.from(
     Object.entries(privateKey).map(([key, value]) => value)
   );
-
   const userAccount = Keypair.fromSecretKey(privateKeyArray)
-  console.log(userAccount.publicKey.toString())
-
-  // Convert IPFS hash to link
-  uri = "https://ipfs.io/ipfs/" + uri
-  console.log(uri)
 
   let mintTransaction;
   handleMintFunction(userAccount, title, symbol, uri).then(result => {
