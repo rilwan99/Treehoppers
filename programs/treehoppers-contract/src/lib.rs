@@ -62,7 +62,7 @@ pub mod treehoppers_contract {
             Some(creators),
             1, // seller_fee_basis_points
             false, // update_authority_is_signer
-            false, // isMutable
+            true, // isMutable
             None, // collection (optional)
             None, // uses (optional)
             None, // Collection Details (optional)
