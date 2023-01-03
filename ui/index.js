@@ -17,7 +17,7 @@ const {
   createAssociatedTokenAccountInstruction, createInitializeMintInstruction,
   getAssociatedTokenAddress, getMinimumBalanceForRentExemptMint, MINT_SIZE, TOKEN_PROGRAM_ID
 } = require("@solana/spl-token");
-const { Metaplex } = require("@metaplex-foundation/js")
+const { Metaplex, keypairIdentity } = require("@metaplex-foundation/js")
 
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
@@ -134,6 +134,27 @@ const getNFTList = async (publicKey) => {
   return nftInfoArray
 }
 
+const updateMetadata = async (userInfo, mintAddress, newMetadata) => {
+  try {
+    const { privateKey }  = userInfo
+    const privateKeyArray = Uint8Array.from(
+      Object.entries(privateKey).map(([key, value]) => value)
+    );
+    const userKeyPair = Keypair.fromSecretKey(privateKeyArray)
+
+    const connection = new Connection(clusterApiUrl('devnet'))
+    const metaplex = new Metaplex(connection)
+    metaplex.use(keypairIdentity(userKeyPair))
+    const mint = new PublicKey(mintAddress);
+
+    const nft = await metaplex.nfts().findByMint({ mintAddress: mint })
+    const { response } = await metaplex.nfts().update({ nftOrSft: nft, uri: newMetadata })
+    return response
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 app.use(bodyParser.json());
 
 app.post('/retrieveKey', (req, res) => {
@@ -224,7 +245,7 @@ app.post('/uploadData', (req, res) => {
       {"trait_type":"Redemption points","value":"10"},
       {"trait_type":"Valid till","value":"31/12/2022"},
       {"trait_type": "owner", "value": "@jackDorsey101"},
-      {"trait_type": "expired", "value": "false"},
+      {"trait_type": "expired", "value": "true"},
     ],
     "properties":{
       "files":[
@@ -275,6 +296,20 @@ app.post("/mint", (req, res) => {
     res.send(`${mintTransaction}`);
   })
 });
+
+app.post("/redeem", (req, res) => {
+
+  const telegramUserId = req.body["id"]
+  const telegramUserName = req.body["handle"];
+  // To Replace
+  // const newMetadata = "https://ipfs.io/ipfs/QmVUmswAquyRLkUyxXjqSVQeBiYVdmjwwvzjJTLUpmRZ5c" // Expired - true
+  const newMetadata = "https://ipfs.io/ipfs/QmXhBer1sJgHvqdgs5Akiz5QJhyfxiiLHgNMhpb9vnRM3F" // Expired - false
+  const mintAddress = "EvM8YaRqgyrrKyt198HRjXaiBCf1df5jpZtdLdxV2bSk"
+
+  getKeysFirebase(telegramUserId, telegramUserName)
+  .then((userInfo) => updateMetadata(userInfo, mintAddress, newMetadata))
+  .then((result) => res.send({"response": result}))
+})
 
 const handleMintFunction = async (userAccount, title, symbol, uri) => {
 

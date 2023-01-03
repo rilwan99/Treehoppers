@@ -318,6 +318,15 @@ async def redeem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # print the error message
         print(response.json()['error'])
 
+    response = requests.post(endpoint_url+"/redeem", json=params_key)
+    if response.status_code == 200:
+        result = response.json()
+        await update.message.reply_text(
+              f"{result}"
+          )
+    else:
+        print(response.json()['error'])
+
 # ----- Deprecated for Personal NFT Minting -----
 
 async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
