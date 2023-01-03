@@ -47,20 +47,24 @@ async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if response.status_code == 200:
         result = response.json()
         print("Response result")
+        print(result)
+        print('------------------------')
+        ## ToDo: Modify options based on response result
+        merchants = result['merchantList']
+        reply_keyboard = [merchants]
+
+        await update.message.reply_text(
+            "Hi, I am the Treehopper. I can help you mint NFT coupons/vouchers! "
+            "Send /cancel to stop talking to me.\n\n"
+            "Firstly, which coupon are you minting?",
+            reply_markup=ReplyKeyboardMarkup(
+                reply_keyboard, one_time_keyboard=True, input_field_placeholder="ShengSiong/Grab/NTUC?"
+            ),
+        )
     else:
         print(response.json()['error'])
 
-    ## ToDo: Modify options based on response result
-    reply_keyboard = [["ShengSiong", "Grab", "NTUC"]]
 
-    await update.message.reply_text(
-        "Hi, I am the Treehopper. I can help you mint NFT coupons/vouchers! "
-        "Send /cancel to stop talking to me.\n\n"
-        "Firstly, which coupon are you minting?",
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder="ShengSiong/Grab/NTUC?"
-        ),
-    )
 
     return CHAIN
 
@@ -121,7 +125,7 @@ async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     user = update.message.from_user
-    chain = update.message.text
+    chain = update.message.text # this is where the option from the reply keyboard goes - grab sheng shiong etc
     context.user_data['chain'] = chain
     logger.info("Coupon Selected by %s: %s", user.first_name, chain)
 
@@ -233,6 +237,8 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if response.status_code == 200:
         print(response)
         txn_hash = response.text
+        result = response.json
+        print(result)
         # Example Hash
         # https://solana.fm/address/67tRjzCsmYwXXDSwkwKCV7vNKRW8dCqJRS2WC6eVBEDr?cluster=devnet-qn1
         nft_url = "https://solana.fm/address/" + txn_hash + "?cluster=devnet-qn1"
