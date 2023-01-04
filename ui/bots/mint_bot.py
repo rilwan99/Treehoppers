@@ -277,17 +277,21 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
               ),)
           print(context.user_data['nft_dict'])
 
+          return ADJUST # only if user has coupons available
     else:
         # print the error message
         print(response.json()['error'])
 
-    return ADJUST
+
 
 async def adjust(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     coupon = update.message.text
+    print('---------------------------')
+    print(coupon)
     user_id = update.effective_user.id
-    logger.info("Coupon Selected by %s: %s", f'{coupon}')
+    # logger.info("Coupon Selected by %s: %s", coupon)
     nft_dict = context.user_data['nft_dict'] #stores as a global variable from claim
+    print(nft_dict)
     mint_address = nft_dict[coupon]['mint_address']
 
     params_new = {
@@ -302,11 +306,14 @@ async def adjust(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     if response.status_code == 200:
         result = response.json()
+        output = result['response']
         await update.message.reply_text(
-              f"{result}"
+              f"{output}"
           )
     else:
         print(response.json()['error'])
+
+    return ConversationHandler.END
 
 # ----- Deprecated for Personal NFT Minting -----
 
@@ -315,12 +322,10 @@ async def end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     if choice == "Yes":
         await update.message.reply_text(
-            "Nice! please send me the NFT that you would like to mint: ",
+            "Please select /mint",
             reply_markup=ReplyKeyboardRemove(),
         )
-
-        return PHOTO
-
+        return ConversationHandler.END
     if choice == "No":
         await update.message.reply_text(
             "Bye! I hope we can talk again some day.", reply_markup=ReplyKeyboardRemove()
@@ -337,7 +342,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "Bye! I hope we can talk again some day.", reply_markup=ReplyKeyboardRemove()
     )
 
-    return ConversationHandler.END
+    # return ConversationHandler.END
 
 def main() -> None:
     """Run the bot."""
@@ -354,8 +359,8 @@ def main() -> None:
             # CommandHandler("upload", upload)
             ],
         states={
-            ADJUST: [MessageHandler(filters.Regex("^(ShengSiong|Grab)$"), adjust)],
-            CHAIN: [MessageHandler(filters.Regex("^(Grab)$"), chain)],
+            ADJUST: [MessageHandler(filters.TEXT, adjust)],
+            CHAIN: [MessageHandler(filters.TEXT, chain)],
             # PHOTO: [MessageHandler(filters.PHOTO, photo)],
             # METADATA: [MessageHandler(filters.Regex("^(.*):(.*)"), metadata)],
             END: [MessageHandler(filters.Regex("^(Yes|No)$"), end)],

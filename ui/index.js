@@ -83,7 +83,7 @@ const insertCouponFirebase = async (userId, couponName, mint_address) => {
       pending: true,
     };
     await setDoc(doc(db, "CouponCollection", primary_key.toString()), docData);
-    return "Your coupon is pending"
+    return "Your coupon claim is pending confirmation"
   } catch (err) {
     console.log(err);
   }
