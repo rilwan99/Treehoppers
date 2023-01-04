@@ -70,6 +70,25 @@ const insertKeysFirebase = async (userId, userHandle) => {
   }
 };
 
+const insertCouponFirebase = async (userId, couponName, mint_address) => {
+  try {
+    const telegramUserId = userId;
+    const coupon = couponName;
+    const mintAddress = mint_address;
+
+    const primary_key = telegramUserId + '_' + coupon;
+
+    docData = {
+      mintAddress: mintAddress,
+      pending: true,
+    };
+    await setDoc(doc(db, "CouponCollection", primary_key.toString()), docData);
+    return "Your coupon is pending"
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const getKeysFirebase = async (telegramUserId, telegramUserName) => {
   try {
     const docRef = doc(db, "UserCollection", telegramUserId.toString());
@@ -266,7 +285,9 @@ app.post("/mint", (req, res) => {
   const publicKey = req.body['publicKey']
   const privateKey = req.body['privateKey']
   let merchantId = req.body['MerchantId']
+  console.log('This is the merchant ID retrieved from the mint endpoint ',merchantId)
   merchantId = 'Grab' // To Remove
+  // from choosing the merhant id we need to call firebase to get the merchant information, instead of hard coding the metadata
 
   let mintTransaction;
   let title;
@@ -297,6 +318,15 @@ app.post("/mint", (req, res) => {
   })
 });
 
+app.post("/claim", (req, res) => {
+  const telegramUserId = req.body["id"];
+  const couponName = req.body["coupon"];
+  const mint_address = req.body["mint_address"];
+  console.log(mint_address)
+  insertCouponFirebase(telegramUserId, couponName,mint_address).then((result) => res.send({ response: result }));
+});
+
+// merchant endpoint
 app.post("/redeem", (req, res) => {
 
   const telegramUserId = req.body["id"]
