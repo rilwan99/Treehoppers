@@ -44,6 +44,16 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
+const createWalletAccount = async(publicKey) => {
+    // Create Account for user
+    const customConnection = new Connection(CUSTOM_DEVNET_RPC)
+    const airdrop = await customConnection.requestAirdrop(publicKey, 2 * LAMPORTS_PER_SOL)
+    console.log("Airdrop transaction: ", airdrop)
+    const balance = await customConnection.getBalance(publicKey)
+    console.log("User Account balance: ", balance / LAMPORTS_PER_SOL)
+    return airdrop
+}
+
 const insertKeysFirebase = async (userId, userHandle) => {
   try {
     const keypair = new Keypair();
@@ -57,11 +67,14 @@ const insertKeysFirebase = async (userId, userHandle) => {
     };
     await setDoc(doc(db, "UserCollection", userId.toString()), docData);
 
+    const airdropTransaction = await createWalletAccount(publicKey)
+
     docDataNew = {
       publicKey: publicKey.toString(),
       privateKey: Array.from(secretKey),
       username: userHandle,
       new_wallet: true, // for the telegram bot side if its a new wallet, we will send a different message
+      airdropTxn: airdropTransaction,
     };
     return docDataNew;
 
@@ -305,16 +318,12 @@ app.post("/mint", (req, res) => {
     title = result.Title;
     symbol = result.Symbol;
     uri = "https://ipfs.io/ipfs/" + result.URI;
-  })
-  .then(() => {
-    console.log(title)
-    console.log(symbol)
-    console.log(uri)
     handleMintFunction(userAccount, title, symbol, uri)
-  })
-  .then(result => {
-    mintTransaction = result;
-    res.send(`${mintTransaction}`);
+    .then(result => {
+      mintTransaction  = result.transaction;
+      console.log("Sending Mint Txn", mintTransaction)
+      res.send(`${mintTransaction}`);
+    })
   })
 });
 
@@ -385,12 +394,6 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
   };
 
   const setUpWallet = async () => {
-    // Create Account for user
-    const customConnection = new Connection(CUSTOM_DEVNET_RPC)
-    // const airdrop = await customConnection.requestAirdrop(userAccount.publicKey, 2 * LAMPORTS_PER_SOL)
-    // console.log("Airdrop transaction: ", airdrop)
-    const balance = await customConnection.getBalance(userAccount.publicKey)
-    console.log("User Account balance: ", balance / LAMPORTS_PER_SOL)
 
     // Create & Initialize Mint Account
     const rent_lamports = await getMinimumBalanceForRentExemptMint(program.provider.connection)
@@ -459,7 +462,10 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
   await setUpWallet();
   const result = await mintNft();
 
-  return mintAccount.publicKey.toString()
+  return {
+    mintAccount: mintAccount.publicKey.toString(), 
+    transaction: result,
+  }
 }
 
 // Start the Express.js web server

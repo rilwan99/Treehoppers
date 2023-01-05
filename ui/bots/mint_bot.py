@@ -166,7 +166,7 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         print(result)
         # Example Hash
         # https://solana.fm/address/67tRjzCsmYwXXDSwkwKCV7vNKRW8dCqJRS2WC6eVBEDr?cluster=devnet-qn1
-        nft_url = "https://solana.fm/address/" + txn_hash + "?cluster=devnet-qn1"
+        nft_url = "https://solana.fm/transaction/" + txn_hash + "?cluster=devnet-qn1"
         await update.message.reply_text(
         f"NFT Minted! You can view your NFT here: {nft_url}"
         )
