@@ -156,13 +156,23 @@ const getNFTList = async (publicKey) => {
     owner: publicKey
   });
   const nftInfoArray = []
+  const mintArray = []
+
   myNfts.forEach(nftMetadata => {
     nftInfoArray.push({
       name: nftMetadata.name, 
       symbol: nftMetadata.symbol, 
-      mintAddress: nftMetadata.mintAddress.toString() 
+      mintAddress: nftMetadata.mintAddress.toString(),
     })
+    mintArray.push(nftMetadata.mintAddress)
   })
+
+  for (let i=0; i<myNfts.length; i++) {
+    const jsonArray = await metaplex.nfts().findByMint({mintAddress: mintArray[i]})
+    nftInfoArray[i].attributes = jsonArray.json.attributes
+    nftInfoArray[i].properties = jsonArray.json.properties
+  }
+
   return nftInfoArray
 }
 
@@ -219,9 +229,10 @@ app.post("/coupons", (req, res) => {
   try {
     // const privateKey = req.body["privateKey"];
     const publicKey = new PublicKey(req.body["publicKey"])
-    getNFTList(publicKey).then((result) => {
-      console.log(result);
-      res.send(result);
+    getNFTList(publicKey)
+    .then((result) =>  {
+      console.log(result)
+      res.send(result)
     });
   } catch (err) {
     console.log(err);
