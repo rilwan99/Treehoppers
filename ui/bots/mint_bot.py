@@ -153,6 +153,7 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         # "title": title,
         # "symbol": symbol,
         "metadata": metadata_CID,
+        "handle": user_handle, 
     }
 
     # Send the request to mint

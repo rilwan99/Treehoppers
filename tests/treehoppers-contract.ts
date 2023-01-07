@@ -118,9 +118,10 @@ describe("treehoppers-contract", () => {
     const uri = "https://metadata.y00ts.com/y/2952.json" 
     const title = "TREEHOPPERS"
     const symbol = "3HOP"
+    const creatorKey = new PublicKey("GxaAAQH9CNuE5LPzBCymGDKNpTy3C3Ep7mqCK2BqWrnz")
     
     const mintTransaction = await program.methods
-    .mintNft(mintAccount.publicKey, uri, title, symbol)
+    .mintNft(creatorKey, uri, title, symbol)
     .accounts({
       mintAuthority: userAccount.publicKey, 
       mintAccount: mintAccount.publicKey, 

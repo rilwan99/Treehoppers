@@ -133,15 +133,33 @@ const getMerchantsFirebase = async () => {
   }
 }
 
-const getMerchantInfoFirebase = async (merchantId) => {
+const getMerchantInfoFirebase = async (merchantId, userHandle) => {
   try {
     const docRef = doc(db, "MerchantCouponsCollection", merchantId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       docData = docSnap.data();
-      return docData
+
+      const rawMetatadata = docData.metadata.attributes
+      const encodeUserInfo = {"trait_type": "owner", "value": userHandle}
+      rawMetatadata.push(encodeUserInfo)
+
+      const options = 
+      { pinataMetadata: { name: "test" },
+        pinataOptions: { cidVersion: 0 }, 
+      };
+      const ipfsUpload = await pinata.pinJSONToIPFS(rawMetatadata, options)
+      const uriHash = ipfsUpload["IpfsHash"]
+
+      const result = {
+        title: docData.Title,
+        symbol: docData.Symbol, 
+        uri: uriHash, 
+        merchantAddress: docData.merchantAddress
+      }
+      return result
     } else {
-      console.log("Invalid Merhcant ID provided")
+      console.log("Invalid Merchant ID provided")
     }
   } catch (err) {
     console.log(err)
@@ -343,28 +361,25 @@ app.post("/mint", (req, res) => {
 
   const publicKey = req.body['publicKey']
   const privateKey = req.body['privateKey']
-  let merchantId = req.body['MerchantId']
-  console.log('This is the merchant ID retrieved from the mint endpoint ',merchantId)
-  merchantId = 'Grab' // To Remove
-  // from choosing the merhant id we need to call firebase to get the merchant information, instead of hard coding the metadata
+  const merchantId = req.body['MerchantId']
+  const userHandle = req.body['handle']
 
   let mintTransaction;
-  let title;
-  let symbol;
-  let uri;
 
   // Create keypair from private key
   const privateKeyArray = Uint8Array.from(
     Object.entries(privateKey).map(([key, value]) => value)
   );
   const userAccount = Keypair.fromSecretKey(privateKeyArray)
-  
-  getMerchantInfoFirebase(merchantId)
+
+  getMerchantInfoFirebase(merchantId, userHandle)
   .then(result => {
-    title = result.Title;
-    symbol = result.Symbol;
-    uri = "https://ipfs.io/ipfs/" + result.URI;
-    handleMintFunction(userAccount, title, symbol, uri)
+    const title = result.title;
+    const symbol = result.symbol;
+    const uri = "https://ipfs.io/ipfs/" + result.uri;
+    const creatorKey = new PublicKey(result.merchantAddress)
+
+    handleMintFunction(userAccount, creatorKey, title, symbol, uri)
     .then(result => {
       mintTransaction  = result.transaction;
       console.log("Sending Mint Txn", mintTransaction)
@@ -396,7 +411,7 @@ app.post("/redeem", (req, res) => {
   .then((result) => res.send({"response": result}))
 })
 
-const handleMintFunction = async (userAccount, title, symbol, uri) => {
+const handleMintFunction = async (userAccount, creatorKey, title, symbol, uri) => {
 
   const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -487,7 +502,7 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
     console.log("MasterEdition Account address: ", masterEditionAccount.toString());
 
     const mintTransaction = await program.methods
-      .mintNft(mintAccount.publicKey, uri, title, symbol)
+      .mintNft(creatorKey, uri, title, symbol)
       .accounts({
         mintAuthority: userAccount.publicKey,
         mintAccount: mintAccount.publicKey,
@@ -501,7 +516,7 @@ const handleMintFunction = async (userAccount, title, symbol, uri) => {
         masterEdition: masterEditionAccount
       })
       .signers([userAccount])
-      .rpc({ commitment: "processed" })
+      .rpc({ skipPreflight: true, commitment: "processed" })
     console.log("Transaction Signature: ", mintTransaction)
     return mintTransaction
   }
