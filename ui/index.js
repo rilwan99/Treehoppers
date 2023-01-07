@@ -135,7 +135,7 @@ const getMerchantsFirebase = async () => {
 
 const getMerchantInfoFirebase = async (merchantId) => {
   try {
-    const docRef = doc(db, "MerchantCollection", merchantId);
+    const docRef = doc(db, "MerchantCouponsCollection", merchantId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       docData = docSnap.data();
@@ -147,6 +147,22 @@ const getMerchantInfoFirebase = async (merchantId) => {
     console.log(err)
   }
 }
+
+const getMerchantsCoupons = async (publicKey) => {
+  try {
+    const docRef = doc(db, "MerchantCouponsCollection", publicKey);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const docData = docSnap.data();
+      return docData.preLoadedAddresses;
+    } else {
+      console.log("Invalid Wallet ID provided")
+    }
+  } catch (err) {
+    console.log(err)
+  }
+} 
+
 
 const getNFTList = async (publicKey) => {
   const connection = new Connection(clusterApiUrl('devnet'))
@@ -203,7 +219,11 @@ const updateMetadata = async (userInfo, mintAddress, newMetadata) => {
 }
 
 app.use(bodyParser.json());
-
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  next();
+});
 app.post('/retrieveKey', (req, res) => {
   try {
     const telegramUserId = req.body["id"]
@@ -224,6 +244,16 @@ app.get('/retrieveMerchants', (req, res) => {
   try {
     getMerchantsFirebase().then(result => {
       res.send({merchantList: result})
+    })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+app.post('/retrieveMerchantsCoupons', (req, res) => {
+  try {
+    getMerchantsCoupons(req.body.publicKey).then(result => {
+      res.send({preloadedAddresses: result})
     })
   } catch (err) {
     console.log(err)
@@ -328,7 +358,7 @@ app.post("/mint", (req, res) => {
     Object.entries(privateKey).map(([key, value]) => value)
   );
   const userAccount = Keypair.fromSecretKey(privateKeyArray)
-
+  
   getMerchantInfoFirebase(merchantId)
   .then(result => {
     title = result.Title;
