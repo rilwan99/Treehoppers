@@ -89,13 +89,12 @@ const insertCouponFirebase = async (userId, couponName, mint_address) => {
     const coupon = couponName;
     const mintAddress = mint_address;
 
-    const primary_key = telegramUserId + '_' + coupon;
-
     docData = {
       mintAddress: mintAddress,
       pending: true,
     };
-    await setDoc(doc(db, "CouponCollection", primary_key.toString()), docData);
+    console.log(docData);
+    await setDoc(doc(db, "CouponCollection", mintAddress), docData);
     return "Your coupon claim is pending confirmation"
   } catch (err) {
     console.log(err);
@@ -169,8 +168,14 @@ const getNFTList = async (publicKey) => {
 
   for (let i=0; i<myNfts.length; i++) {
     const jsonArray = await metaplex.nfts().findByMint({mintAddress: mintArray[i]})
-    nftInfoArray[i].attributes = jsonArray.json.attributes
-    nftInfoArray[i].properties = jsonArray.json.properties
+    console.log(jsonArray)
+    // nftInfoArray[i].attributes = jsonArray.json.attributes
+    // nftInfoArray[i].properties = jsonArray.json.properties
+    nftAttributes = jsonArray.json.attributes
+    expiry = nftAttributes[4]['value']
+    nftInfoArray[i].expired = expiry
+    console.log(expiry)
+    console.log(typeof(expiry));
   }
 
   return nftInfoArray

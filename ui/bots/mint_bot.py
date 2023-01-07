@@ -245,12 +245,18 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         nft_dict = {}
         for nft in nfts:
           # must take into account the expired fieldfor 
-          name = nft['name']
-          mint_address = nft['mintAddress']
-          if name in nft_dict:
-            nft_dict[name]['count'] += 1 #increasing the count with every similar NFT
-          else:
-            nft_dict[name] = {'mint_address':mint_address,'count':1}
+            name = nft['name']
+            mint_address = nft['mintAddress']
+            expired = nft['expired']
+            print(expired)
+            print(type(expired))
+            if expired != 'false':
+                pass
+            else:
+                if name in nft_dict:
+                    nft_dict[name]['count'] += 1 #increasing the count with every similar NFT
+                else:
+                    nft_dict[name] = {'mint_address':mint_address,'count':1}
           # you have 16 grab nfts, now you have 15 etc
         reply_keyboard = [list(nft_dict.keys())]
         reply_string = ''
