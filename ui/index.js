@@ -135,7 +135,7 @@ const getMerchantsFirebase = async () => {
 
 const getMerchantInfoFirebase = async (merchantId, userHandle) => {
   try {
-    const docRef = doc(db, "MerchantCouponsCollection", merchantId);
+    const docRef = doc(db, "MerchantCollection", merchantId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       docData = docSnap.data();
@@ -374,6 +374,7 @@ app.post("/mint", (req, res) => {
 
   getMerchantInfoFirebase(merchantId, userHandle)
   .then(result => {
+    console.log(result)
     const title = result.title;
     const symbol = result.symbol;
     const uri = "https://ipfs.io/ipfs/" + result.uri;
