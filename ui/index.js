@@ -148,7 +148,7 @@ const getMerchantInfoFirebase = async (merchantId, userHandle) => {
       { pinataMetadata: { name: "test" },
         pinataOptions: { cidVersion: 0 }, 
       };
-      const ipfsUpload = await pinata.pinJSONToIPFS(rawMetatadata, options)
+      const ipfsUpload = await pinata.pinJSONToIPFS(docData.metadata, options)
       const uriHash = ipfsUpload["IpfsHash"]
 
       const result = {
