@@ -22,7 +22,88 @@ const { Metaplex, keypairIdentity } = require("@metaplex-foundation/js")
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
 const JWT = process.env.JWT;
-const idl = process.env.IDL;
+const idl = {
+  "version": "0.1.0",
+  "name": "treehoppers_contract",
+  "instructions": [
+    {
+      "name": "mintNft",
+      "accounts": [
+        {
+          "name": "mintAuthority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "masterEdition",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "creatorKey",
+          "type": "publicKey"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "address": "BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x"
+  }
+}
 const port = process.env.PORT || 3000;
 
 // Create a new Express.js web server
