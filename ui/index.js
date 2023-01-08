@@ -206,7 +206,7 @@ const getNFTList = async (publicKey) => {
     // nftInfoArray[i].attributes = jsonArray.json.attributes
     // nftInfoArray[i].properties = jsonArray.json.properties
     nftAttributes = jsonArray.json.attributes
-    expiry = nftAttributes[4]['value']
+    expiry = nftAttributes[3]['value']
     nftInfoArray[i].expired = expiry
     console.log(expiry)
     console.log(typeof(expiry));
