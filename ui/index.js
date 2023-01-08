@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const idl = require("../target/idl/treehoppers_contract.json")
+// const idl = require("../target/idl/treehoppers_contract.json")
 require("dotenv").config({ path: "../.env" });
 const firebase = require("firebase/app");
 
@@ -22,6 +22,7 @@ const { Metaplex, keypairIdentity } = require("@metaplex-foundation/js")
 // Load ENV Variables
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
 const JWT = process.env.JWT;
+const idl = process.env.IDL;
 
 // Create a new Express.js web server
 const app = express();
