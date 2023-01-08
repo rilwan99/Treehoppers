@@ -23,6 +23,7 @@ const { Metaplex, keypairIdentity } = require("@metaplex-foundation/js")
 const CUSTOM_DEVNET_RPC = process.env.CUSTOM_DEVNET_RPC;
 const JWT = process.env.JWT;
 const idl = process.env.IDL;
+const port = process.env.PORT || 3000;
 
 // Create a new Express.js web server
 const app = express();
