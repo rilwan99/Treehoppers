@@ -11,12 +11,15 @@
   "license": "ISC",
   "dependencies": {
     "@metaplex-foundation/js": "^0.17.12",
+    "@pinata/sdk": "^2.1.0",
     "@project-serum/anchor": "^0.26.0",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
     "body-parser": "^1.20.1",
+    "dns": "^0.2.2",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "firebase": "^9.15.0"
+    "firebase": "^9.15.0",
+    "fs": "^0.0.1-security"
   }
 }
