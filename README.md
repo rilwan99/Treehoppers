@@ -92,3 +92,12 @@ Our bot uses the python-telegram-bot library for the telegram bot, ExpressJS as 
 - Contract deployed to [BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x](https://solana.fm/address/BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x) (Devnet)
 
 ## Builders
+<p align='center'>
+<img src="imgs/builders.png"/>
+</p>
+
+Do feel free to connect with us!
+- Liam [[LinkedIn]](https://www.linkedin.com/in/liam-ayathan-046b3816b/) , [[Github]](https://github.com/liam-ayathan)
+- Rilwan [[LinkedIn]](https://www.linkedin.com/in/muhammad-rilwan-884484156/) , [[Github]](https://github.com/rilwan99)
+- Advait [[LinkedIn]](https://www.linkedin.com/in/advaittt/) , [[Github]](https://github.com/crustyapples)
+- Avran [[LinkedIn]](https://www.linkedin.com/in/avranwong/) , [[Github]](https://github.com/AvranWong)
