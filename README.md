@@ -25,9 +25,14 @@ For a better understanding of the project, do check out our pitch deck [here](ht
 ## Benefits
 
 ## Process Flow
+<p align='center'>
+<img src="imgs/process_flow.png"/>
+</p>
 
 ## Technical Stack
-
+<p align='center'>
+<img src="imgs/tech_stack.png"/>
+</p>
 ## Overview and Installation
 1. Seamless Minting of NFT
 2. Custodial wallet Holding your Nft for max convenience
