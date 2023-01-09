@@ -1,5 +1,12 @@
 # Treehoppers
-A telegram bot that interacts directly on the Solana blockchain!
+Our project aims to help Merchants with customer acquisition through the creation of a telegram bot that enables customers to claim coupons directly on the blockchain (Solana). Our project Consists of two parts: 
+
+<ul>
+<li>A telegram bot that allows customers to interacts directly on the Solana blockchain as seen in this repo</li>
+<li>A merchant facing application, allowing them to create new coupon collections which can be found [here](https://github.com/crustyapples/treehoppers-merchant)</li>
+</ul>
+
+For a better understanding of the project, do check out our pitch deck [here](https://www.canva.com/design/DAFXJE3KDho/jDnSqSJxUaFqxMSJB15D1g/view?utm_content=DAFXJE3KDho&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink) and the demo of our application on [Youtube]!(https://www.youtube.com/watch?v=EzBdCXiMzFM)!
 
 ### Overview
 1. Seamless Minting of NFT
