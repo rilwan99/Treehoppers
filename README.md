@@ -33,6 +33,7 @@ For a better understanding of the project, do check out our pitch deck [here](ht
 <p align='center'>
 <img src="imgs/tech_stack.png"/>
 </p>
+
 ## Overview and Installation
 
 1. Seamless Minting of NFT
