@@ -9,7 +9,7 @@ Our project aims to help Merchants with customer acquisition through the creatio
 For a better understanding of the project, do check out our pitch deck [here](https://www.canva.com/design/DAFXJE3KDho/jDnSqSJxUaFqxMSJB15D1g/view?utm_content=DAFXJE3KDho&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink) and the demo of our application on [Youtube](https://www.youtube.com/watch?v=EzBdCXiMzFM)!
 
 <p align='center'>
-<img src="imgs/intro_page.png" width="1000" height="585"/>
+<img src="imgs/intro_page.png"/>
 </p>
 
 # Table of Contents
