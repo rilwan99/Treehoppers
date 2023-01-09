@@ -9,22 +9,22 @@ Our project aims to help Merchants with customer acquisition through the creatio
 For a better understanding of the project, do check out our pitch deck [here](https://www.canva.com/design/DAFXJE3KDho/jDnSqSJxUaFqxMSJB15D1g/view?utm_content=DAFXJE3KDho&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink) and the demo of our application on [Youtube](https://www.youtube.com/watch?v=EzBdCXiMzFM)!
 
 # Table of Contents
-- [Problem and Solution](## Problem and solution)
-- [Benefits](## Benefits)
-- [Process Flow](## Process Flow)
-- [Technical Stack](## Technical Stack)
-- [Overview and Installation](## Overview and Installation)
-- [BUILDERS](## Builders)
+- [Problem and Solution](##Problem and solution)
+- [Benefits](##Benefits)
+- [Process Flow](##Process Flow)
+- [Technical Stack](##Technical Stack)
+- [Overview and Installation](##Overview and Installation)
+- [BUILDERS](## uilders)
 
-## Problem and solution
+##Problem and solution
 
-## Benefits
+##Benefits
 
-## Process Flow
+##Process Flow
 
-## Technical Stack
+##Technical Stack
 
-## Overview and Installation
+##Overview and Installation
 1. Seamless Minting of NFT
 2. Custodial wallet Holding your Nft for max convenience
 3. Instant mint and confirmation
@@ -49,4 +49,4 @@ Our bot uses the python-telegram-bot library for the telegram bot, ExpressJS as 
 ### Deployment
 - Contract deployed to [BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x](https://solana.fm/address/BgAh9RE8D5119VA1q28MxPMx77mdbYxWc7DPB5ULAB5x) (Devnet)
 
-## Builders
+##Builders
