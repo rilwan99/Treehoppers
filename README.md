@@ -13,12 +13,12 @@ For a better understanding of the project, do check out our pitch deck [here](ht
 </p>
 
 # Table of Contents
-- [Problem and Solution](##problem-and-solution)
-- [Benefits](##benefits)
-- [Process Flow](##process-flow)
-- [Technical Stack](##technical-stack)
-- [Overview and Installation](##overview-and-installation)
-- [BUILDERS](##builders)
+- [Problem and Solution](#problem-and-solution)
+- [Benefits](#benefits)
+- [Process Flow](#process-flow)
+- [Technical Stack](#technical-stack)
+- [Overview and Installation](#overview-and-installation)
+- [BUILDERS](#builders)
 
 ## Problem and Solution
 So first of all, what problem are we trying to address? Well how do retailers, particularly small and medium business, try to increase retention and acquisition.
