@@ -21,6 +21,14 @@ For a better understanding of the project, do check out our pitch deck [here](ht
 - [BUILDERS](##builders)
 
 ## Problem and Solution
+So first of all, what problem are we trying to address? Well how do retailers, particularly small and medium business, try to increase retention and acquisition.
+
+They use <br>coupons</br>! However there are several issues with coupons as it stands.
+
+1. Physical coupons are a hassle for customers and are often left unclaimed, wasting resources. Depending on the size of the physical coupon it could be anywhere between $0.30 and $2.50.
+2. Digital coupons although they provide more flexibility, leave retailers at the mercy of platform providers. For platform providers like Mezzofy they typically charge a Flat Rate of US$0.40 Per Coupon.
+
+As such, our solution is a telegram bot that enables customers to claim coupons on the blockchain directly.
 
 ## Benefits
 
