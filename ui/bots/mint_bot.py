@@ -15,7 +15,7 @@ import os
 #Import Environment Vairables
 load_dotenv()
 TELE_API = os.getenv('TELE_API')
-
+PORT = int(os.environ.get('PORT', 5000))
 import requests
 
 # Enable logging
@@ -377,9 +377,14 @@ def main() -> None:
 
     application.add_handler(conv_handler)
 
-    # Run the bot until the user presses Ctrl-C
-    application.run_polling()
+    # # Run the bot until the user presses Ctrl-C
+    # application.run_polling()
 
+    application.start_webhook(listen="0.0.0.0",
+                          port=int(PORT),
+                          url_path=TELE_API)
+    # updater.bot.setWebhook('https://ancient-hamlet-17787.herokuapp.com/' + TOKEN)
+    application.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
 
 if __name__ == "__main__":
     main()
