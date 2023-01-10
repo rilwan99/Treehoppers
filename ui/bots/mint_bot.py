@@ -41,7 +41,8 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
 
 async def mint(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    endpoint_url = "http://localhost:3000"
+    # endpoint_url = "http://localhost:3000"
+    endpoint_url = "https://treehopper-backemd.onrender.com"
     response = requests.get(endpoint_url+'/retrieveMerchants')
 
     if response.status_code == 200:
@@ -86,7 +87,8 @@ async def chain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     # Post request to Express API
     # Set the endpoint URL, local for now
-    endpoint_url = "http://localhost:3000"
+    # endpoint_url = "http://localhost:3000"
+    endpoint_url = "https://treehopper-backemd.onrender.com"
 
     params_key = {
         "id": user_id,
@@ -201,7 +203,8 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     )
     # Post request to Express API
     # Set the endpoint URL, local for now
-    endpoint_url = "http://localhost:3000"
+    # endpoint_url = "http://localhost:3000"
+    endpoint_url = "https://treehopper-backemd.onrender.com"
 
     params_key = {
         "id": user_id,
@@ -307,7 +310,8 @@ async def adjust(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "mint_address": mint_address
     }
 
-    endpoint_url = "http://localhost:3000"
+    # endpoint_url = "http://localhost:3000"
+    endpoint_url = "https://treehopper-backemd.onrender.com"
 
     response = requests.post(endpoint_url+"/claim", json=params_new)
 
@@ -389,7 +393,7 @@ def main() -> None:
                           port=int(PORT),
                           url_path=TELE_API,
                           webhook_url='https://treehopper-bot.onrender.com/' + TELE_API)
-                          
+
     # updater.bot.setWebhook('https://ancient-hamlet-17787.herokuapp.com/' + TOKEN)
     # application.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
 
