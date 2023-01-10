@@ -17,7 +17,7 @@ import os
 load_dotenv()
 TELE_API = os.getenv('TELE_API')
 PORT = int(os.environ.get('PORT', 5000))
-updater = Updater(token=TELE_API, use_context=True)
+updater = Updater(bot=TELE_API, use_context=True)
 dispatcher = updater.dispatcher
 
 import requests
