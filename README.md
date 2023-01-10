@@ -49,8 +49,12 @@ Why Blockchain?
 
 1. Retailers like Food Panda will send us a small fee to create the smart contract for the coupons and update the merchant application (made using Next.js) with the relevant fields for the metadata.
 2. Customers will see the coupon promotions on various telegram channels.
-3. Customers will mint the coupons via our telegram bot.
+3. Customers will mint the coupons via our telegram bot, and the retailers can view them in their dashboard:
+![image](https://user-images.githubusercontent.com/24990448/211553288-f5880151-bc2d-415f-90ba-ca93fd0c640c.png)
+
 4. When the customers redeems the coupon he is verified by the retailer (Food Panda)
+![image](https://user-images.githubusercontent.com/24990448/211553513-3951e833-4a61-4828-9f25-a5ed712b8d0f.png)
+
 5. The retailer will update the coupon metadata once it is used via the merchant application, turning the expiry field to true. In this way, the coupon can no longer be used.
 
 ## Technical Stack
