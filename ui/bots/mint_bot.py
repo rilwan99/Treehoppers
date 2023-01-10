@@ -1,6 +1,6 @@
 import logging
 import requests
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, Updater
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -8,6 +8,7 @@ from telegram.ext import (
     ConversationHandler,
     MessageHandler,
     filters,
+    Updater
 )
 from dotenv import load_dotenv
 import os
