@@ -383,12 +383,14 @@ def main() -> None:
     # # Run the bot until the user presses Ctrl-C
     # application.run_polling()
 
+
     updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
-                          url_path=TELE_API)
-    # updater.bot.setWebhook('https://ancient-hamlet-17787.herokuapp.com/' + TOKEN)
+                          url_path=TELE_API,
+                          webhook_url='https://treehopper-bot.onrender.com/' + TELE_API)
 
-    updater.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
+    # updater.bot.setWebhook('https://ancient-hamlet-17787.herokuapp.com/' + TOKEN)
+    # updater.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
 
 if __name__ == "__main__":
     main()
