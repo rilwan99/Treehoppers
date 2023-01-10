@@ -8,7 +8,6 @@ from telegram.ext import (
     ConversationHandler,
     MessageHandler,
     filters,
-    Updater
 )
 from dotenv import load_dotenv
 import os
@@ -17,9 +16,6 @@ import os
 load_dotenv()
 TELE_API = os.getenv('TELE_API')
 PORT = int(os.environ.get('PORT', 5000))
-updater = Updater(token=TELE_API, use_context=True)
-dispatcher = updater.dispatcher
-
 import requests
 
 # Enable logging
@@ -358,7 +354,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
-    # application = Application.builder().token(TELE_API).build()
+    application = Application.builder().token(TELE_API).build()
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
@@ -379,19 +375,18 @@ def main() -> None:
         fallbacks=[CommandHandler("cancel", cancel)],
     )
 
-    dispatcher.add_handler(conv_handler)
+    application.add_handler(conv_handler)
 
     # # Run the bot until the user presses Ctrl-C
     # application.run_polling()
 
-
-    updater.start_webhook(listen="0.0.0.0",
+    application.updater.start_webhook(listen="0.0.0.0",
                           port=int(PORT),
                           url_path=TELE_API,
                           webhook_url='https://treehopper-bot.onrender.com/' + TELE_API)
-
+                          
     # updater.bot.setWebhook('https://ancient-hamlet-17787.herokuapp.com/' + TOKEN)
-    # updater.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
+    # application.bot.setWebhook('https://treehopper-bot.onrender.com/' + TELE_API)
 
 if __name__ == "__main__":
     main()
