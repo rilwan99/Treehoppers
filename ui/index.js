@@ -614,4 +614,4 @@ const handleMintFunction = async (userAccount, creatorKey, title, symbol, uri) =
 }
 
 // Start the Express.js web server
-app.listen(port, () => console.log("Express.js API listening on port 3000"));
+app.listen(port, () => console.log(`Express.js API listening on port ${port}`));
